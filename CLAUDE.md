@@ -16,7 +16,7 @@ PWA na telefon z Androidem (Chrome) do sesji papierowego RPG w klimacie Cyberpun
 - `scenes.json` — lista scen: `id` (unikalne), `name`, `shader`, opcjonalnie `image`, `intensity`, `theme` (`glitch` | `neon` | `rain`; klasa `theme-*` na body steruje kolorami UI i animacją cyfr w `style.css`).
 - `app.js` — UI: wybór efektu (‹ › lista) nie zmienia ekranu, dopiero AKTYWUJ; kości: kość → modyfikator −2…+6 → RZUĆ, animacja migających cyfr. Aktywna scena w localStorage. `dice.js` — notacja NdM, d%, kh/kl/dh/dl, stałe; crypto RNG z odrzucaniem.
 - `service-worker.js` — network-first z cache offline; nazwa cache `rpg-table-v1` podmieniana w CI na SHA.
-- UI: styl cyberpunk — zero zaokrągleń, pełnoszerokie paski góra/dół, dolny pasek w jednej linii (musi mieścić się na 375 px).
+- UI: styl cyberpunk — zero zaokrągleń, pełnoszerokie paski góra/dół, dolny pasek w jednej linii (musi mieścić się na 375 px). Czcionki w `fonts/` (OFL, offline, także w precache SW): UI i motyw glitch — Share Tech Mono, neon — Tilt Neon, rain — Orbitron. Wynik rzutu zostaje na ekranie do „cofnij”, kolejnego rzutu albo aktywacji innego efektu.
 
 ## Workflow
 1. Edycja.

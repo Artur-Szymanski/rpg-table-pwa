@@ -49,6 +49,7 @@
     try {
       const [src] = await Promise.all([fetchText(scene.shader), renderer.setImage(scene.image || null)]);
       renderer.setShader(src);
+      if (index !== active) hideResult();
       active = index;
       store(SCENE_KEY, scene.id);
       const intensity = typeof scene.intensity === 'number' ? scene.intensity : 1;
@@ -114,7 +115,14 @@
     mod = parseInt(b.dataset.mod, 10);
     modRow.querySelectorAll('[data-mod]').forEach((x) => x.classList.toggle('on', x === b));
   }));
-  $('btn-back').addEventListener('click', () => { modRow.hidden = true; pickRow.hidden = false; });
+  $('btn-back').addEventListener('click', () => { hideResult(); modRow.hidden = true; pickRow.hidden = false; });
+
+  // The result stays on screen until "Cofnij", the next roll, or activating another scene.
+  function hideResult() {
+    clearTimeout(rollTimer);
+    result.hidden = true;
+    result.className = '';
+  }
   $('btn-roll').addEventListener('click', () => doRoll());
 
   function setTotal(text) {
@@ -152,9 +160,8 @@
       detailEl.textContent = 'd' + die + ' [' + natural + ']' + (mod ? ' ' + signed(mod) : '');
       result.className = '';
       void result.offsetWidth; // restart animations
-      result.className = 'settled fade';
+      result.className = 'settled';
       if (navigator.vibrate) navigator.vibrate(r.crit ? [40, 60, 40] : 30);
-      rollTimer = setTimeout(() => { result.hidden = true; }, 3300);
     };
     tick();
   }
@@ -169,6 +176,9 @@
       const res = await fetch('scenes.json');
       scenes = (await res.json()).scenes;
     } catch (e) { showError('Nie można wczytać scenes.json: ' + e.message); return; }
+
+    // Load bundled fonts up front so the first roll already uses them.
+    if (document.fonts) ['Share Tech Mono', 'Tilt Neon', 'Orbitron'].forEach((f) => document.fonts.load('700 40px "' + f + '"', '0123456789').catch(() => {}));
 
     select.replaceChildren(...scenes.map((s, i) => new Option(s.name, String(i))));
     const savedIndex = scenes.findIndex((s) => s.id === load(SCENE_KEY, null));

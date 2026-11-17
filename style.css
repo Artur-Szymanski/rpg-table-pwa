@@ -1,4 +1,10 @@
 /* Cyberpunk UI: hard edges, full-width top / bottom bars. Theme follows the active scene. */
+
+/* Bundled fonts (SIL OFL, see fonts/OFL-*.txt) so they work offline. */
+@font-face { font-family: "Share Tech Mono"; src: url("fonts/ShareTechMono-Regular.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "Tilt Neon"; src: url("fonts/TiltNeon.ttf") format("truetype"); font-display: block; }
+@font-face { font-family: "Orbitron"; src: url("fonts/Orbitron.ttf") format("truetype"); font-weight: 400 900; font-display: block; }
+
 :root {
   --bg: #000;
   --fg: #e8f6ff;
@@ -8,7 +14,7 @@
   --accent2: #ff2a6d;
   --accent-fg: #000;
   --border: rgba(0, 240, 255, 0.35);
-  --ui-font: Consolas, "Roboto Mono", "Droid Sans Mono", ui-monospace, monospace;
+  --ui-font: "Share Tech Mono", Consolas, "Roboto Mono", ui-monospace, monospace;
   --digit-font: var(--ui-font);
   color-scheme: dark;
 }
@@ -16,13 +22,13 @@ body.theme-neon {
   --accent: #ff2a9d;
   --accent2: #00e5ff;
   --border: rgba(255, 42, 157, 0.4);
-  --digit-font: Bahnschrift, "Roboto Condensed", sans-serif-condensed, "Arial Narrow", sans-serif;
+  --digit-font: "Tilt Neon", Bahnschrift, sans-serif-condensed, sans-serif;
 }
 body.theme-rain {
   --accent: #8fb8ff;
   --accent2: #ff7a3d;
   --border: rgba(143, 184, 255, 0.35);
-  --digit-font: Bahnschrift, "Roboto Condensed", sans-serif-condensed, "Arial Narrow", sans-serif;
+  --digit-font: "Orbitron", Bahnschrift, sans-serif-condensed, sans-serif;
 }
 
 * { box-sizing: border-box; border-radius: 0 !important; }
@@ -137,8 +143,6 @@ button.primary:active { background: var(--fg); }
   pointer-events: none;
   z-index: 5;
 }
-#roll-result.fade { animation: fade-out 0.6s ease-in 2.6s forwards; }
-@keyframes fade-out { to { opacity: 0; } }
 
 .roll-total {
   position: relative;
@@ -162,7 +166,7 @@ button.primary:active { background: var(--fg); }
 .roll-total.fumble { --hit: #ff3b3b; }
 
 /* Glitch: RGB split slices, jitter while rolling. */
-.theme-glitch .roll-total { text-shadow: 3px 0 #ff2a6d, -3px 0 #00f0ff, 0 0 18px rgba(0, 0, 0, 0.9); color: var(--hit, #fff); }
+.theme-glitch .roll-total { font-weight: 400; text-shadow: 3px 0 #ff2a6d, -3px 0 #00f0ff, 0 0 18px rgba(0, 0, 0, 0.9); color: var(--hit, #fff); }
 .theme-glitch .roll-total::before,
 .theme-glitch .roll-total::after {
   content: attr(data-text);
@@ -194,7 +198,7 @@ button.primary:active { background: var(--fg); }
 
 /* Neon: thin tube glow, flickers while rolling, ignites on the result. */
 .theme-neon .roll-total {
-  font-weight: 300;
+  font-weight: 400;
   color: #fff;
   text-shadow: 0 0 4px #fff, 0 0 12px var(--hit, var(--accent)), 0 0 28px var(--hit, var(--accent)), 0 0 60px var(--hit, var(--accent));
 }

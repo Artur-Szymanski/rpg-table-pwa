@@ -3,7 +3,8 @@
 const CACHE = 'rpg-table-v1';
 const PRECACHE = [
   './', 'index.html', 'style.css', 'dice.js', 'renderer.js', 'app.js',
-  'scenes.json', 'manifest.json', 'icons/icon-192.png', 'icons/icon-512.png'
+  'scenes.json', 'manifest.json', 'icons/icon-192.png', 'icons/icon-512.png',
+  'fonts/ShareTechMono-Regular.ttf', 'fonts/TiltNeon.ttf', 'fonts/Orbitron.ttf'
 ];
 
 self.addEventListener('install', (event) => {

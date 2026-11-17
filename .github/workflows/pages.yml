@@ -37,7 +37,7 @@ jobs:
       - name: Prepare site
         run: |
           mkdir _site
-          cp -r index.html style.css app.js dice.js renderer.js service-worker.js manifest.json scenes.json shaders images icons _site/
+          cp -r index.html style.css app.js dice.js renderer.js service-worker.js manifest.json scenes.json shaders images icons fonts _site/
           # Bust the service worker cache on every deploy.
           sed -i "s/rpg-table-v1/rpg-table-${GITHUB_SHA::8}/" _site/service-worker.js
 

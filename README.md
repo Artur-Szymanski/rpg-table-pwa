@@ -10,7 +10,8 @@ na pełnym ekranie i działa offline.
   (przy pierwszym użyciu także pełny ekran i blokada wygaszania). Migający przycisk = wybrany efekt jest inny niż aktywny.
 - **Suwak INT**: parametr `uIntensity` aktywnego efektu.
 - **Dolny pasek (kości)**: wybierz kość (d4–d100), potem modyfikator −2…+6 i **RZUĆ**; ↩ wraca do wyboru kości.
-  Przez chwilę migają losowe liczby, potem wynik. Krój i efekt cyfr zależą od motywu aktywnego efektu.
+  Przez chwilę migają losowe liczby, potem wynik, który zostaje na ekranie do ↩, kolejnego rzutu albo aktywacji
+  innego efektu. Krój i efekt cyfr zależą od motywu aktywnego efektu (czcionki w `fonts/`, licencja SIL OFL).
 
 Losowanie: `crypto.getRandomValues` z odrzucaniem, więc bez przekłamań rozkładu.
 
