@@ -1,5 +1,6 @@
-// Dark overcast night sky over a city, lit from below by neon, with pouring rain.
-// uIntensity scales rain density / brightness.
+// Looking up into dark churning storm clouds: rain falls toward the viewer (streaks radiating
+// from the vanishing point), lightning flickers inside the clouds, and water drops sit on and
+// slide down the lens, refracting the view. uIntensity scales rain amount.
 
 float hash11(float p) { p = fract(p * 0.1031); p *= p + 33.33; p *= p + p; return fract(p); }
 float hash12(vec2 p) {
@@ -15,78 +16,130 @@ float vnoise(vec2 p) {
 }
 float fbm(vec2 p) {
   float s = 0.0, a = 0.5;
-  for (int i = 0; i < 5; i++) { s += a * vnoise(p); p = p * 2.03 + 17.1; a *= 0.5; }
+  for (int i = 0; i < 5; i++) { s += a * vnoise(p); p = p * 2.02 + 17.1; a *= 0.5; }
   return s;
 }
 
-// One layer of falling rain streaks.
-float rain(vec2 uv, float scale, float speed, float seed, float density) {
-  uv.x += uv.y * 0.15;                       // slant
-  vec2 p = uv * vec2(scale, scale * 0.18);
-  p.y += iTime * speed;
-  vec2 id = floor(p);
-  vec2 f = fract(p);
-  if (hash12(id + seed) > density) return 0.0;
-  float x = 0.15 + 0.7 * hash12(id + seed + 1.0);
-  float len = 0.35 + 0.4 * hash12(id + seed + 2.0);
-  float head = 0.1 + 0.4 * hash12(id + seed + 3.0);
-  float line = smoothstep(0.08, 0.0, abs(f.x - x));
-  float trail = smoothstep(head + len, head, f.y) * step(head, f.y);
-  return line * trail;
+// --- Sky behind the lens -----------------------------------------------------------------
+
+float cloudDensity(vec2 q, float t) {
+  vec2 c = q * (1.0 + 0.35 * dot(q, q)) * 2.2;   // dome-like perspective
+  vec2 warp = vec2(fbm(c * 1.3 + vec2(t * 0.05, 0.0)), fbm(c * 1.3 + vec2(5.2, -t * 0.04)));
+  return fbm(c + 0.8 * warp + vec2(t * 0.02, t * 0.012));
+}
+
+// Rain streaks radiating from the vanishing point (drops falling toward the viewer).
+float rainLayer(vec2 q, vec2 vp, float n, float speed, float seed, float I) {
+  vec2 d = q - vp;
+  float r = length(d);
+  float a = atan(d.y, d.x) / 6.2831853 + 0.5;
+  float id = floor(a * n);
+  float fa = fract(a * n) - 0.5;
+  float h = hash11(id * 1.31 + seed);
+  if (h > 0.35 + 0.5 * I) return 0.0;
+  float z = fract(hash11(id + seed * 7.0) - iTime * speed);   // 1 = far, 0 = at the lens
+  float R = 0.05 / (z + 0.03);                                  // screen radius of the drop
+  float len = 0.18 * R;                                          // motion-blur streak length
+  float radial = smoothstep(R - len, R, r) * smoothstep(R + 0.01, R, r);
+  float w = 0.001 + 0.003 * (1.0 - z);
+  float across = smoothstep(w, 0.0, abs(fa) * 6.2831853 / n * r);
+  return radial * across * smoothstep(0.12, 0.45, R) * 0.8;    // far drops near the centre stay invisible
+}
+
+vec3 sky(vec2 q, float t, float I) {
+  float D = cloudDensity(q, t);
+  float D2 = cloudDensity(q + vec2(0.03, 0.04), t);     // offset sample for fake lighting
+  float shade = clamp((D - D2) * 5.0 + 0.5, 0.0, 1.0);
+  float dens = smoothstep(0.3, 0.8, D);
+  vec3 col = mix(vec3(0.02, 0.025, 0.035), vec3(0.3, 0.33, 0.4), dens);
+  col *= 0.4 + 1.1 * shade;
+
+  // Faint neon city glow bleeding in from the edges of the view.
+  col += vec3(0.35, 0.06, 0.3) * smoothstep(0.35, 1.0, length(q)) * 0.18;
+
+  // Lightning: random flashes lighting the clouds from inside.
+  float k = floor(t / 2.5);
+  if (hash11(k * 2.3) > 0.55) {
+    float ft = fract(t / 2.5) * 2.5;
+    float flash = exp(-ft * 4.0) * (0.55 + 0.45 * sin(ft * 70.0)) + 0.6 * exp(-abs(ft - 0.25) * 30.0);
+    vec2 c = (vec2(hash11(k), hash11(k + 1.7)) - 0.5) * vec2(0.8, 1.0);
+    float glow = exp(-length(q - c) * 2.5) * (0.4 + dens);
+    col += vec3(0.6, 0.65, 0.85) * glow * flash * 1.4;
+  }
+
+  // Rain toward the viewer, three depths.
+  vec2 vp = vec2(0.04 * sin(t * 0.3), 0.06);
+  float rn = rainLayer(q, vp, 140.0, 0.9, 1.0, I) * 0.5
+           + rainLayer(q, vp, 90.0, 0.7, 2.0, I) * 0.7
+           + rainLayer(q, vp, 60.0, 0.55, 3.0, I);
+  col += vec3(0.6, 0.65, 0.8) * rn * 0.9;
+  return col;
+}
+
+// --- Water on the lens ---------------------------------------------------------------------
+// Each returns (refraction normal xy, coverage mask).
+
+vec3 staticDrops(vec2 q, float t) {
+  vec2 g = q * 8.0;
+  vec2 id = floor(g);
+  vec2 f = fract(g) - 0.5;
+  float h = hash12(id);
+  vec2 c = (vec2(hash12(id + 1.3), hash12(id + 7.1)) - 0.5) * 0.6;
+  float life = fract(t * 0.06 + h);
+  float R = (0.1 + 0.18 * hash12(id + 3.3)) * smoothstep(0.0, 0.03, life) * (1.0 - 0.7 * life) * step(0.3, h);
+  vec2 d = f - c;
+  float m = smoothstep(R, R * 0.8, length(d));
+  return vec3(d / max(R, 1e-3) * m, m);
+}
+
+vec3 slidingDrops(vec2 q, float t, float cols, float seed) {
+  float gx = q.x * cols + seed;
+  float id = floor(gx);
+  float h = hash11(id * 3.7 + seed);
+  if (h < 0.35) return vec3(0.0);
+  float sp = 0.07 + 0.08 * hash11(id + 9.1);
+  float tt = t * sp + h * 10.0;
+  float yy = 0.7 - fract(tt + 0.04 * sin(tt * 40.0)) * 1.6;   // stick-slip motion downward
+  float xc = (hash11(id + 1.0) - 0.5) * 0.5 + 0.06 * sin(q.y * 9.0 + h * 6.0);
+  float dx = (fract(gx) - 0.5 - xc) / cols;
+  float dy = q.y - yy;
+  float R = 0.022 + 0.012 * hash11(id + 4.4);
+  vec2 d = vec2(dx, dy * (dy > 0.0 ? 0.75 : 1.1));            // teardrop: longer on top
+  float m = smoothstep(R, R * 0.8, length(d));
+  vec2 n = d / R * m;
+
+  // Wet trail of tiny droplets left above the drop.
+  float trail = step(0.0, dy) * smoothstep(0.45, 0.0, dy);
+  float cy = q.y * 45.0;
+  float tid = floor(cy);
+  vec2 td = vec2(dx, (fract(cy) - 0.5) / 45.0);
+  float tr = 0.004 * step(0.4, hash11(tid + id * 13.0)) * trail;
+  float tm = smoothstep(tr, tr * 0.6, length(td)) * step(0.0005, tr);
+  n += td / max(tr, 1e-4) * tm * 0.6;
+  return vec3(n, max(m, tm));
 }
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
-  vec2 uv = fragCoord / iResolution.xy;
-  float aspect = iResolution.x / iResolution.y;
-  vec2 p = vec2(uv.x * aspect, uv.y);
-  float I = uIntensity;
   float t = iTime;
+  float I = uIntensity;
+  vec2 q = (fragCoord - 0.5 * iResolution.xy) / iResolution.y;
 
-  // Clouds: slow drift with a bit of domain warping.
-  vec2 q = p * vec2(1.6, 2.6) + vec2(t * 0.03, 0.0);
-  float w = fbm(q + vec2(fbm(q + t * 0.02), fbm(q - 3.7)));
-  float clouds = smoothstep(0.25, 0.85, w);
+  vec3 a = staticDrops(q, t);
+  vec3 b = slidingDrops(q, t, 5.0, 0.0);
+  vec3 c = slidingDrops(q, t * 1.3, 7.0, 0.5);
+  vec2 n = a.xy + b.xy + c.xy;
+  float mask = clamp(a.z + b.z + c.z, 0.0, 1.0) * min(I + 0.3, 1.0);
 
-  // City light pollution from below (magenta / orange), fading upward.
-  float glowH = exp(-uv.y * 3.0);
-  vec3 cityGlow = mix(vec3(0.55, 0.12, 0.45), vec3(0.8, 0.35, 0.1), 0.5 + 0.5 * sin(uv.x * 3.0 + 1.0));
-  vec3 sky = vec3(0.015, 0.02, 0.035);
-  sky += cityGlow * glowH * 0.35;
-  sky += mix(vec3(0.03, 0.035, 0.05), cityGlow * 0.5, glowH) * clouds;
+  // Drops act like tiny lenses: magnified, flipped view of the sky.
+  vec3 col = sky(q - n * 0.06 * mask, t, I);
 
-  // Rare lightning flicker inside the clouds.
-  float ft = floor(t * 1.5);
-  float flash = step(0.96, hash11(ft)) * exp(-fract(t * 1.5) * 6.0) * (0.6 + 0.4 * sin(t * 60.0));
-  sky += vec3(0.5, 0.55, 0.7) * flash * clouds * 0.6 * min(I, 1.5);
+  // Drop rim shading and a small highlight.
+  float rim = smoothstep(0.6, 1.0, length(n)) * mask;
+  col *= 1.0 - 0.45 * rim;
+  col += vec3(0.5, 0.55, 0.65) * smoothstep(0.5, 0.9, dot(normalize(n + 1e-4), vec2(-0.6, 0.8))) * rim * 0.4;
+  col += vec3(0.03) * mask;
 
-  // City skyline silhouette with lit windows.
-  float bx = floor(p.x * 9.0);
-  float bh = 0.08 + 0.17 * hash11(bx * 3.1) + 0.08 * step(0.85, hash11(bx * 7.3));
-  vec3 col = sky;
-  if (uv.y < bh) {
-    col = vec3(0.01, 0.008, 0.015);
-    vec2 wc = vec2(p.x * 90.0, uv.y * 110.0);
-    vec2 wid = floor(wc);
-    vec2 wf = fract(wc);
-    float lit = step(0.72, hash12(wid)) * step(0.2, wf.x) * step(wf.x, 0.75) * step(0.25, wf.y) * step(wf.y, 0.7);
-    lit *= step(0.08, hash11(floor(t * 0.5) + wid.x * 13.0 + wid.y)); // windows switch occasionally
-    vec3 wcol = hash12(wid + 9.0) > 0.7 ? vec3(0.1, 0.8, 1.0) : vec3(1.0, 0.65, 0.3);
-    col += wcol * lit * 0.55;
-    col += cityGlow * 0.05;
-  }
-
-  // Rain: far, mid, near layers.
-  float r = 0.0;
-  r += rain(p, 70.0, 5.0, 1.0, 0.35 * I) * 0.25;
-  r += rain(p, 40.0, 7.0, 7.0, 0.3 * I) * 0.45;
-  r += rain(p, 22.0, 10.0, 13.0, 0.22 * I) * 0.8;
-  vec3 rainCol = mix(vec3(0.55, 0.6, 0.75), cityGlow, 0.3 * glowH) + vec3(0.6) * flash;
-  col += rainCol * r * 0.5;
-
-  // Mist near the ground and vignette.
-  col += vec3(0.05, 0.05, 0.08) * I * exp(-uv.y * 8.0) * (0.6 + 0.4 * vnoise(p * 3.0 + t * 0.3));
-  vec2 v = uv - 0.5;
-  col *= 1.0 - 0.5 * dot(v, v);
-
+  vec2 v = fragCoord / iResolution.xy - 0.5;
+  col *= 1.0 - 0.6 * dot(v, v);
   fragColor = vec4(col, 1.0);
 }
