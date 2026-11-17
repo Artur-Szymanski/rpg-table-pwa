@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+  <!-- Placeholder scene image. Replace with your own artwork (JPG/PNG/WebP). -->
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2b1d14"/>
+      <stop offset="1" stop-color="#5a3a22"/>
+    </linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3b2416"/>
+      <stop offset="1" stop-color="#1a0f08"/>
+    </linearGradient>
+    <radialGradient id="fire" cx="0.5" cy="0.6" r="0.5">
+      <stop offset="0" stop-color="#fff2b0"/>
+      <stop offset="0.4" stop-color="#ff9a2e"/>
+      <stop offset="1" stop-color="#7a1d05" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#wall)"/>
+  <g stroke="#1e130c" stroke-width="6" opacity="0.6">
+    <line x1="0" y1="140" x2="1600" y2="140"/>
+    <line x1="0" y1="300" x2="1600" y2="300"/>
+    <line x1="0" y1="460" x2="1600" y2="460"/>
+    <line x1="0" y1="620" x2="1600" y2="620"/>
+  </g>
+  <rect x="0" y="0" width="1600" height="60" fill="#140c07"/>
+  <rect x="200" y="0" width="60" height="700" fill="#24160d"/>
+  <rect x="1340" y="0" width="60" height="700" fill="#24160d"/>
+  <!-- Fireplace -->
+  <rect x="560" y="420" width="480" height="340" rx="12" fill="#3a332e"/>
+  <rect x="620" y="480" width="360" height="280" fill="#0e0a08"/>
+  <ellipse cx="800" cy="690" rx="190" ry="150" fill="url(#fire)"/>
+  <rect x="520" y="400" width="560" height="40" rx="6" fill="#4a3f38"/>
+  <!-- Floor -->
+  <rect x="0" y="760" width="1600" height="240" fill="url(#floor)"/>
+  <!-- Table and mugs -->
+  <rect x="150" y="780" width="420" height="30" rx="6" fill="#6b4426"/>
+  <rect x="180" y="810" width="24" height="150" fill="#4a2e18"/>
+  <rect x="516" y="810" width="24" height="150" fill="#4a2e18"/>
+  <rect x="260" y="730" width="44" height="52" rx="6" fill="#8a6a45"/>
+  <rect x="380" y="736" width="40" height="46" rx="6" fill="#8a6a45"/>
+  <rect x="1060" y="790" width="380" height="28" rx="6" fill="#6b4426"/>
+  <rect x="1090" y="818" width="22" height="140" fill="#4a2e18"/>
+  <rect x="1390" y="818" width="22" height="140" fill="#4a2e18"/>
+  <!-- Window -->
+  <rect x="1180" y="160" width="140" height="200" rx="70" fill="#0d1630"/>
+  <circle cx="1270" cy="210" r="16" fill="#e8e6d0" opacity="0.8"/>
+</svg>

@@ -1,0 +1,50 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate scenes.json and referenced files
+        run: |
+          python3 - <<'EOF'
+          import json, os, sys
+          scenes = json.load(open('scenes.json'))['scenes']
+          missing = [p for s in scenes for p in (s.get('shader'), s.get('image')) if p and not os.path.exists(p)]
+          ids = [s['id'] for s in scenes]
+          if missing: sys.exit('Missing files: ' + ', '.join(missing))
+          if len(ids) != len(set(ids)): sys.exit('Duplicate scene ids')
+          print(f'{len(scenes)} scenes OK')
+          EOF
+
+      - name: Prepare site
+        run: |
+          mkdir _site
+          cp -r index.html style.css app.js dice.js renderer.js service-worker.js manifest.json scenes.json shaders images icons _site/
+          # Bust the service worker cache on every deploy.
+          sed -i "s/rpg-table-v1/rpg-table-${GITHUB_SHA::8}/" _site/service-worker.js
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

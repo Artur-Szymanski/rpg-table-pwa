@@ -1,0 +1,36 @@
+{
+  "scenes": [
+    {
+      "id": "tavern-fire",
+      "name": "Tavern (fire glow)",
+      "image": "images/tavern.svg",
+      "shader": "shaders/image_fire_glow.frag",
+      "intensity": 1.0
+    },
+    {
+      "id": "black-fog",
+      "name": "Black fog",
+      "shader": "shaders/black_fog.frag",
+      "intensity": 1.0
+    },
+    {
+      "id": "embers",
+      "name": "Embers",
+      "shader": "shaders/embers.frag",
+      "intensity": 1.0
+    },
+    {
+      "id": "arcane-portal",
+      "name": "Arcane portal",
+      "shader": "shaders/arcane_portal.frag",
+      "intensity": 1.0
+    },
+    {
+      "id": "tavern-plain",
+      "name": "Tavern (static image)",
+      "image": "images/tavern.svg",
+      "shader": "shaders/image.frag",
+      "intensity": 1.0
+    }
+  ]
+}
