@@ -8,6 +8,8 @@
   const errorBox = $('error');
   const activateBtn = $('btn-activate');
   const SCENE_KEY = 'rpg-table.scene';
+  const INTENSITY_KEY = 'rpg-table.intensity'; // { sceneId: value }
+  const savedIntensity = load(INTENSITY_KEY, {});
 
   let renderer;
   let scenes = [];
@@ -53,7 +55,8 @@
       if (index !== active) hideResult();
       active = index;
       store(SCENE_KEY, scene.id);
-      const intensity = typeof scene.intensity === 'number' ? scene.intensity : 1;
+      const intensity = typeof savedIntensity[scene.id] === 'number' ? savedIntensity[scene.id]
+        : typeof scene.intensity === 'number' ? scene.intensity : 1;
       renderer.intensity = intensity;
       $('intensity').value = intensity;
       document.body.className = 'theme-' + (scene.theme || 'glitch');
@@ -70,7 +73,12 @@
     enterFullscreen();
     activateScene(selected);
   });
-  $('intensity').addEventListener('input', (e) => { renderer.intensity = parseFloat(e.target.value); });
+  $('intensity').addEventListener('input', (e) => {
+    renderer.intensity = parseFloat(e.target.value);
+    if (active < 0) return;
+    savedIntensity[scenes[active].id] = renderer.intensity;
+    store(INTENSITY_KEY, savedIntensity);
+  });
 
   // --- UI visibility: tap empty screen to toggle -----------------------------------------
   let tapStart = null;

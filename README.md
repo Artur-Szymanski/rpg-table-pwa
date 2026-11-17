@@ -8,7 +8,7 @@ na pełnym ekranie i działa offline.
 - **Stuknięcie w ekran**: pokaż / ukryj paski UI.
 - **Górny pasek**: ‹ / lista / › tylko wybierają efekt (ekran się nie zmienia), **AKTYWUJ** go włącza
   (przy pierwszym użyciu także pełny ekran i blokada wygaszania). Migający przycisk = wybrany efekt jest inny niż aktywny.
-- **Suwak INT**: parametr `uIntensity` aktywnego efektu.
+- **Suwak INT**: parametr `uIntensity` aktywnego efektu; ustawienie jest zapamiętywane osobno dla każdego efektu.
 - **Dolny pasek (kości)**: wybierz kość (d4–d100), potem modyfikator −2…+6 i **RZUĆ**; ↩ wraca do wyboru kości.
   Przez chwilę migają losowe liczby, potem wynik, który zostaje na ekranie do ↩, kolejnego rzutu albo aktywacji
   innego efektu. Krój i efekt cyfr zależą od motywu aktywnego efektu (czcionki w `fonts/`, licencja SIL OFL).
