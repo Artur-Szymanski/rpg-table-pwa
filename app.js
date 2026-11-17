@@ -49,6 +49,7 @@
     try {
       const [src] = await Promise.all([fetchText(scene.shader), renderer.setImage(scene.image || null)]);
       renderer.setShader(src);
+      renderer.setPost(scene);
       if (index !== active) hideResult();
       active = index;
       store(SCENE_KEY, scene.id);

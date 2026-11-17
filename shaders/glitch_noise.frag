@@ -55,8 +55,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   float tear = step(0.995, hash12(vec2(floor(fragCoord.y / 3.0), tick)));
   col += vec3(0.6, 0.9, 1.0) * tear * burst * I;
 
-  // Scanlines and vignette.
-  col *= 0.82 + 0.18 * sin(fragCoord.y * 1.5708);
+  // Vignette (interlace lines come from the global post-process).
   vec2 v = uv - 0.5;
   col *= 1.0 - 0.6 * dot(v, v);
 
