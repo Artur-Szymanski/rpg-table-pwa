@@ -24,7 +24,7 @@ Losowanie: `crypto.getRandomValues` z odrzucaniem, więc bez przekłamań rozkł
    Dostępne: `iResolution`, `iTime`, `iTimeDelta`, `iFrame`, `iMouse`, `iChannel0` (grafika sceny),
    `iChannel0Size`, `uIntensity` oraz funkcja `sampleCover(uv)` (grafika dopasowana do ekranu).
 3. Dopisz scenę do `scenes.json` (`id`, `name`, `shader`, opcjonalnie `image`, `intensity`,
-   `theme`: `glitch` | `neon` | `rain` — motyw kolorów UI i animacji wyniku rzutu,
+   `theme`: `glitch` | `neon` | `rain` | `lamp` — motyw kolorów UI i animacji wyniku rzutu,
    `scanlines` i `aberration` — siła interlinii i aberracji chromatycznej, domyślnie 0.22 i 1, 0 wyłącza).
 
 Shadery z Shadertoy działają zwykle bez zmian. Shadery HLSL trzeba przetłumaczyć na GLSL ES 3.0

@@ -20,6 +20,15 @@
       "shader": "shaders/rain_sky.frag",
       "theme": "rain",
       "intensity": 1.0
+    },
+    {
+      "id": "lamp",
+      "name": "Lamp",
+      "shader": "shaders/lamp.frag",
+      "theme": "lamp",
+      "intensity": 1.0,
+      "scanlines": 0,
+      "aberration": 0.4
     }
   ]
 }

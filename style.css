@@ -24,6 +24,12 @@ body.theme-neon {
   --border: rgba(255, 42, 157, 0.4);
   --digit-font: "Tilt Neon", Bahnschrift, sans-serif-condensed, sans-serif;
 }
+body.theme-lamp {
+  --accent: #ffb347;
+  --accent2: #ff7a2a;
+  --border: rgba(255, 179, 71, 0.4);
+  --digit-font: "Orbitron", Bahnschrift, sans-serif-condensed, sans-serif;
+}
 body.theme-rain {
   --accent: #8fb8ff;
   --accent2: #ff7a3d;
@@ -206,6 +212,18 @@ button.primary:active { background: var(--fg); }
 .theme-neon .rolling .roll-total { animation: neon-hum 0.15s steps(2) infinite; opacity: 0.75; }
 .theme-neon .settled .roll-total { animation: neon-ignite 0.7s linear 1; }
 @keyframes neon-hum { 50% { opacity: 0.35; } }
+
+/* Lamp: dark digits silhouetted against the bright glowing panel. */
+.theme-lamp .roll-total {
+  font-weight: 800;
+  color: #120600;
+  text-shadow: 0 0 1px #000, 0 0 24px rgba(255, 190, 110, 0.7);
+}
+.theme-lamp .roll-total.crit { color: #7a4a00; }
+.theme-lamp .roll-total.fumble { color: #6e0a00; }
+.theme-lamp .roll-detail { color: rgba(30, 12, 0, 0.85); text-shadow: 0 0 6px rgba(255, 210, 150, 0.8); }
+.theme-lamp .rolling .roll-total { animation: neon-hum 0.15s steps(2) infinite; }
+.theme-lamp .settled .roll-total { animation: rain-focus 0.5s ease-out 1; }
 @keyframes neon-ignite {
   0%, 18%, 30%, 52% { opacity: 1; }
   10%, 24%, 44% { opacity: 0.15; }
