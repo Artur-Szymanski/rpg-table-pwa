@@ -9,49 +9,55 @@
   <link rel="icon" href="icons/icon-192.png">
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="theme-glitch">
   <canvas id="stage"></canvas>
   <div id="error" hidden></div>
 
   <!-- Dice result overlay -->
   <div id="roll-result" hidden>
-    <div class="roll-total"></div>
+    <div class="roll-total" data-text=""></div>
     <div class="roll-detail"></div>
   </div>
 
   <!-- Controls (tap the screen to show / hide) -->
   <div id="ui">
-    <header class="bar">
-      <button id="btn-prev" aria-label="Poprzednia scena">‹</button>
-      <select id="scene-select" aria-label="Scena"></select>
-      <button id="btn-next" aria-label="Następna scena">›</button>
-      <button id="btn-fullscreen" aria-label="Pełny ekran">⛶</button>
+    <header class="bar bar-top">
+      <div class="row">
+        <button id="btn-prev" aria-label="Poprzedni efekt">‹</button>
+        <select id="scene-select" aria-label="Efekt"></select>
+        <button id="btn-next" aria-label="Następny efekt">›</button>
+        <button id="btn-activate" class="primary">Aktywuj</button>
+      </div>
+      <div class="row intensity">
+        <label for="intensity">INT</label>
+        <input id="intensity" type="range" min="0" max="2" step="0.01" value="1">
+      </div>
     </header>
 
-    <section class="bar intensity">
-      <label for="intensity">Intensywność</label>
-      <input id="intensity" type="range" min="0" max="2" step="0.01" value="1">
-    </section>
-
-    <section id="dice" class="panel">
-      <div class="dice-buttons">
-        <button data-roll="1d4">d4</button>
-        <button data-roll="1d6">d6</button>
-        <button data-roll="1d8">d8</button>
-        <button data-roll="1d10">d10</button>
-        <button data-roll="1d12">d12</button>
-        <button data-roll="1d20">d20</button>
-        <button data-roll="1d100">d100</button>
-        <button data-roll="2d20kh1">Przewaga</button>
-        <button data-roll="2d20kl1">Utrudnienie</button>
-        <button data-roll="4d6kh3">Cecha</button>
+    <footer id="dice" class="bar bar-bottom">
+      <div id="dice-pick" class="row">
+        <button data-die="4">d4</button>
+        <button data-die="6">d6</button>
+        <button data-die="8">d8</button>
+        <button data-die="10">d10</button>
+        <button data-die="12">d12</button>
+        <button data-die="20">d20</button>
+        <button data-die="100">d100</button>
       </div>
-      <form id="dice-form" autocomplete="off">
-        <input id="dice-input" type="text" inputmode="text" placeholder="np. 2d6+3, 8d6, 2d20kh1+5" spellcheck="false">
-        <button type="submit">Rzuć</button>
-      </form>
-      <ol id="dice-history"></ol>
-    </section>
+      <div id="dice-mod" class="row" hidden>
+        <button data-mod="-2">−2</button>
+        <button data-mod="-1">−1</button>
+        <button data-mod="0" class="on">0</button>
+        <button data-mod="1">+1</button>
+        <button data-mod="2">+2</button>
+        <button data-mod="3">+3</button>
+        <button data-mod="4">+4</button>
+        <button data-mod="5">+5</button>
+        <button data-mod="6">+6</button>
+        <button id="btn-back" class="icon" aria-label="Cofnij">↩</button>
+        <button id="btn-roll" class="primary">Rzuć <span id="roll-die">d20</span></button>
+      </div>
+    </footer>
   </div>
 
   <script src="dice.js"></script>

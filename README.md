@@ -1,23 +1,16 @@
 # RPG Table
 
-Aplikacja PWA wspierająca sesje papierowego RPG: pełnoekranowe grafiki, efekty oparte na shaderach
+Aplikacja PWA wspierająca sesje papierowego RPG w klimacie Cyberpunk: pełnoekranowe grafiki, efekty oparte na shaderach
 i rzuty kośćmi. Działa w Chrome na Androidzie; po instalacji („Dodaj do ekranu głównego”) startuje
 na pełnym ekranie i działa offline.
 
 ## Obsługa
-- **Stuknięcie w ekran**: pokaż / ukryj panel.
-- **Przesunięcie w lewo / prawo**: następna / poprzednia scena.
-- **⛶**: pełny ekran i blokada wygaszania ekranu.
-- **Suwak Intensywność**: parametr `uIntensity` przekazywany do shadera.
-- **Kości**: przyciski szybkich rzutów albo notacja w polu tekstowym.
-
-### Notacja kości
-| Zapis | Znaczenie |
-|---|---|
-| `d20`, `3d6`, `d%` | zwykłe rzuty (`d%` = d100) |
-| `2d6+3`, `1d8-1+1d4` | sumy i modyfikatory |
-| `2d20kh1` / `2d20kl1` | zachowaj najwyższy / najniższy (przewaga / utrudnienie) |
-| `4d6dl1` | odrzuć najniższy |
+- **Stuknięcie w ekran**: pokaż / ukryj paski UI.
+- **Górny pasek**: ‹ / lista / › tylko wybierają efekt (ekran się nie zmienia), **AKTYWUJ** go włącza
+  (przy pierwszym użyciu także pełny ekran i blokada wygaszania). Migający przycisk = wybrany efekt jest inny niż aktywny.
+- **Suwak INT**: parametr `uIntensity` aktywnego efektu.
+- **Dolny pasek (kości)**: wybierz kość (d4–d100), potem modyfikator −2…+6 i **RZUĆ**; ↩ wraca do wyboru kości.
+  Przez chwilę migają losowe liczby, potem wynik. Krój i efekt cyfr zależą od motywu aktywnego efektu.
 
 Losowanie: `crypto.getRandomValues` z odrzucaniem, więc bez przekłamań rozkładu.
 
@@ -29,7 +22,8 @@ Losowanie: `crypto.getRandomValues` z odrzucaniem, więc bez przekłamań rozkł
    ```
    Dostępne: `iResolution`, `iTime`, `iTimeDelta`, `iFrame`, `iMouse`, `iChannel0` (grafika sceny),
    `iChannel0Size`, `uIntensity` oraz funkcja `sampleCover(uv)` (grafika dopasowana do ekranu).
-3. Dopisz scenę do `scenes.json`.
+3. Dopisz scenę do `scenes.json` (`id`, `name`, `shader`, opcjonalnie `image`, `intensity`,
+   `theme`: `glitch` | `neon` | `rain` — motyw kolorów UI i animacji wyniku rzutu).
 
 Shadery z Shadertoy działają zwykle bez zmian. Shadery HLSL trzeba przetłumaczyć na GLSL ES 3.0
 (`float2` → `vec2`, `lerp` → `mix`, `frac` → `fract`, `saturate(x)` → `clamp(x, 0.0, 1.0)`, `mul(a, b)` → `a * b`

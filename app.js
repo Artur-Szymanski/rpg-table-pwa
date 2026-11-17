@@ -6,12 +6,13 @@
   const ui = $('ui');
   const select = $('scene-select');
   const errorBox = $('error');
-  const HISTORY_KEY = 'rpg-table.dice-history';
+  const activateBtn = $('btn-activate');
   const SCENE_KEY = 'rpg-table.scene';
 
   let renderer;
   let scenes = [];
-  let current = 0;
+  let selected = 0; // shown in the picker
+  let active = -1;  // currently rendered
   const shaderCache = new Map();
 
   function showError(err) {
@@ -34,24 +35,40 @@
     return text;
   }
 
-  async function showScene(index) {
+  // --- Scenes: browsing only changes the selection; "Aktywuj" applies it ---------------------
+  function selectScene(index) {
     if (!scenes.length) return;
-    current = (index + scenes.length) % scenes.length;
-    const scene = scenes[current];
-    select.value = String(current);
-    store(SCENE_KEY, scene.id);
+    selected = (index + scenes.length) % scenes.length;
+    select.value = String(selected);
+    activateBtn.classList.toggle('pending', selected !== active);
+  }
+
+  async function activateScene(index) {
+    const scene = scenes[index];
     clearError();
     try {
       const [src] = await Promise.all([fetchText(scene.shader), renderer.setImage(scene.image || null)]);
       renderer.setShader(src);
-      if (typeof scene.intensity === 'number') {
-        renderer.intensity = scene.intensity;
-        $('intensity').value = scene.intensity;
-      }
+      active = index;
+      store(SCENE_KEY, scene.id);
+      const intensity = typeof scene.intensity === 'number' ? scene.intensity : 1;
+      renderer.intensity = intensity;
+      $('intensity').value = intensity;
+      document.body.className = 'theme-' + (scene.theme || 'glitch');
     } catch (e) {
       showError(scene.name + ': ' + (e.message || e));
     }
+    selectScene(selected);
   }
+
+  $('btn-prev').addEventListener('click', () => selectScene(selected - 1));
+  $('btn-next').addEventListener('click', () => selectScene(selected + 1));
+  select.addEventListener('change', () => selectScene(parseInt(select.value, 10)));
+  activateBtn.addEventListener('click', () => {
+    enterFullscreen();
+    activateScene(selected);
+  });
+  $('intensity').addEventListener('input', (e) => { renderer.intensity = parseFloat(e.target.value); });
 
   // --- UI visibility: tap empty screen to toggle -----------------------------------------
   let tapStart = null;
@@ -63,86 +80,84 @@
     tapStart = null;
   });
 
-  // Swipe left / right on the canvas switches scenes.
-  let swipe = null;
-  canvas.addEventListener('touchstart', (e) => { const t = e.touches[0]; swipe = { x: t.clientX, y: t.clientY }; }, { passive: true });
-  canvas.addEventListener('touchend', (e) => {
-    if (!swipe) return;
-    const t = e.changedTouches[0];
-    const dx = t.clientX - swipe.x;
-    const dy = t.clientY - swipe.y;
-    if (Math.abs(dx) > 80 && Math.abs(dx) > Math.abs(dy) * 1.5) showScene(current + (dx < 0 ? 1 : -1));
-    swipe = null;
-  });
-
-  $('btn-prev').addEventListener('click', () => showScene(current - 1));
-  $('btn-next').addEventListener('click', () => showScene(current + 1));
-  select.addEventListener('change', () => showScene(parseInt(select.value, 10)));
-  $('intensity').addEventListener('input', (e) => { renderer.intensity = parseFloat(e.target.value); });
-
-  // --- Fullscreen + keep screen awake -------------------------------------------------------
+  // --- Fullscreen + keep screen awake (on first activation) --------------------------------
   let wakeLock = null;
   async function requestWakeLock() {
     try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (e) { /* not allowed */ }
   }
   document.addEventListener('visibilitychange', () => { if (!document.hidden && wakeLock !== null) requestWakeLock(); });
 
-  $('btn-fullscreen').addEventListener('click', async () => {
-    try {
-      if (document.fullscreenElement) await document.exitFullscreen();
-      else {
-        await document.documentElement.requestFullscreen({ navigationUI: 'hide' });
-        if (screen.orientation && screen.orientation.lock) screen.orientation.lock('any').catch(() => {});
-      }
-    } catch (e) { /* fullscreen not available */ }
+  function enterFullscreen() {
+    if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
+    }
     requestWakeLock();
-  });
-
-  // --- Dice ---------------------------------------------------------------------------------
-  const history = load(HISTORY_KEY, []);
-  const historyList = $('dice-history');
-  const result = $('roll-result');
-
-  function renderHistory() {
-    historyList.replaceChildren(...history.slice(0, 30).map((r) => {
-      const li = document.createElement('li');
-      const left = document.createElement('span');
-      left.textContent = r.input + ': ' + r.detail;
-      const right = document.createElement('b');
-      right.textContent = r.total;
-      li.append(left, right);
-      return li;
-    }));
   }
 
-  function doRoll(notation) {
+  // --- Dice: pick a die, then a modifier, then roll -----------------------------------------
+  const pickRow = $('dice-pick');
+  const modRow = $('dice-mod');
+  const result = $('roll-result');
+  const totalEl = result.querySelector('.roll-total');
+  const detailEl = result.querySelector('.roll-detail');
+  let die = 20;
+  let mod = 0;
+  let rollTimer = null;
+
+  pickRow.querySelectorAll('[data-die]').forEach((b) => b.addEventListener('click', () => {
+    die = parseInt(b.dataset.die, 10);
+    $('roll-die').textContent = 'd' + die;
+    pickRow.hidden = true;
+    modRow.hidden = false;
+  }));
+  modRow.querySelectorAll('[data-mod]').forEach((b) => b.addEventListener('click', () => {
+    mod = parseInt(b.dataset.mod, 10);
+    modRow.querySelectorAll('[data-mod]').forEach((x) => x.classList.toggle('on', x === b));
+  }));
+  $('btn-back').addEventListener('click', () => { modRow.hidden = true; pickRow.hidden = false; });
+  $('btn-roll').addEventListener('click', () => doRoll());
+
+  function setTotal(text) {
+    totalEl.textContent = text;
+    totalEl.dataset.text = text;
+  }
+
+  function signed(n) { return n > 0 ? '+' + n : n < 0 ? '−' + -n : ''; }
+
+  function doRoll() {
+    const notation = '1d' + die + (mod > 0 ? '+' + mod : mod < 0 ? String(mod) : '');
     let r;
     try { r = Dice.roll(notation); } catch (e) { showError(e.message); return; }
     clearError();
-    history.unshift({ input: r.input, total: r.total, detail: r.detail.replace(/~/g, '') });
-    history.length = Math.min(history.length, 100);
-    store(HISTORY_KEY, history);
-    renderHistory();
+    const natural = r.total - mod;
 
-    const total = result.querySelector('.roll-total');
-    total.textContent = r.total;
-    total.classList.toggle('crit', r.crit);
-    total.classList.toggle('fumble', r.fumble);
-    result.querySelector('.roll-detail').textContent = r.input + ' → ' + r.detail.replace(/~(\d+)~/g, '($1)');
+    // Flicker random values for a moment, slowing down, then settle on the result.
+    clearTimeout(rollTimer);
     result.hidden = false;
-    result.classList.remove('show');
-    void result.offsetWidth; // restart animation
-    result.classList.add('show');
-    if (navigator.vibrate) navigator.vibrate(r.crit ? [40, 60, 40] : 30);
+    result.className = 'rolling';
+    totalEl.classList.remove('crit', 'fumble');
+    detailEl.textContent = 'd' + die + ' ' + signed(mod);
+    const start = performance.now();
+    const duration = 750;
+    const tick = () => {
+      const elapsed = performance.now() - start;
+      if (elapsed < duration) {
+        setTotal(String(Dice.rollDie(die) + mod));
+        rollTimer = setTimeout(tick, 35 + 110 * (elapsed / duration) ** 2);
+        return;
+      }
+      setTotal(String(r.total));
+      totalEl.classList.toggle('crit', r.crit);
+      totalEl.classList.toggle('fumble', r.fumble);
+      detailEl.textContent = 'd' + die + ' [' + natural + ']' + (mod ? ' ' + signed(mod) : '');
+      result.className = '';
+      void result.offsetWidth; // restart animations
+      result.className = 'settled fade';
+      if (navigator.vibrate) navigator.vibrate(r.crit ? [40, 60, 40] : 30);
+      rollTimer = setTimeout(() => { result.hidden = true; }, 3300);
+    };
+    tick();
   }
-
-  document.querySelectorAll('[data-roll]').forEach((b) => b.addEventListener('click', () => doRoll(b.dataset.roll)));
-  $('dice-form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const v = $('dice-input').value.trim();
-    if (v) doRoll(v);
-  });
-  renderHistory();
 
   // --- Boot ---------------------------------------------------------------------------------
   async function boot() {
@@ -156,9 +171,9 @@
     } catch (e) { showError('Nie można wczytać scenes.json: ' + e.message); return; }
 
     select.replaceChildren(...scenes.map((s, i) => new Option(s.name, String(i))));
-    const savedId = load(SCENE_KEY, null);
-    const savedIndex = scenes.findIndex((s) => s.id === savedId);
-    showScene(savedIndex >= 0 ? savedIndex : 0);
+    const savedIndex = scenes.findIndex((s) => s.id === load(SCENE_KEY, null));
+    selected = savedIndex >= 0 ? savedIndex : 0;
+    activateScene(selected);
   }
   boot();
 

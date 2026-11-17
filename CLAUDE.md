@@ -1,6 +1,6 @@
 # RPG Table — kontekst dla Claude
 
-PWA na telefon z Androidem (Chrome) do sesji papierowego RPG: pełnoekranowe grafiki, efekty shaderowe i rzuty kośćmi. Użytkownik prowadzi sesje i rozmawia po polsku.
+PWA na telefon z Androidem (Chrome) do sesji papierowego RPG w klimacie Cyberpunk: pełnoekranowe grafiki, efekty shaderowe i rzuty kośćmi. Użytkownik prowadzi sesje i rozmawia po polsku.
 
 - Repo: https://github.com/Artur-Szymanski/rpg-table-pwa (publiczne), lokalnie `C:\_DATA\Repos\rpg-table-pwa` (celowo poza OneDrive).
 - Strona: https://artur-szymanski.github.io/rpg-table-pwa/
@@ -11,12 +11,12 @@ PWA na telefon z Androidem (Chrome) do sesji papierowego RPG: pełnoekranowe gra
 - Shadery HLSL od użytkownika tłumaczymy na GLSL ES 3.0.
 
 ## Architektura
-- `renderer.js` — WebGL2, shadery w konwencji Shadertoy (`void mainImage(out vec4, in vec2)`). Nagłówek dokleja uniformy: `iResolution`, `iTime`, `iTimeDelta`, `iFrame`, `iMouse`, `iChannel0` (obraz sceny), `iChannel0Size`, `uIntensity` (suwak w UI) i helper `sampleCover(uv)` (dopasowanie „cover”). Nie deklaruj ich ponownie w `.frag`.
+- `renderer.js` — WebGL2, shadery w konwencji Shadertoy (`void mainImage(out vec4, in vec2)`). Nagłówek dokleja uniformy: `iResolution`, `iTime`, `iTimeDelta`, `iFrame`, `iMouse`, `iChannel0` (obraz sceny), `iChannel0Size`, `uIntensity` (suwak w UI) i helper `sampleCover(uv)` (dopasowanie „cover”). Nie deklaruj ich ponownie w `.frag`. Unikaj słów zarezerwowanych GLSL jako nazw zmiennych (np. `active`, `input`, `output`, `filter`, `sample`).
 - `shaders/*.frag` — każdy samodzielny (WebGL nie ma `#include`); `shaders/common_noise.glsl` to tylko kopia wzorcowa funkcji szumu do wklejania.
-- `scenes.json` — lista scen: `id` (unikalne), `name`, `shader`, opcjonalnie `image`, `intensity`.
-- `app.js` — UI, przełączanie scen (swipe / select), localStorage. `dice.js` — notacja NdM, d%, kh/kl/dh/dl, stałe; crypto RNG z odrzucaniem.
+- `scenes.json` — lista scen: `id` (unikalne), `name`, `shader`, opcjonalnie `image`, `intensity`, `theme` (`glitch` | `neon` | `rain`; klasa `theme-*` na body steruje kolorami UI i animacją cyfr w `style.css`).
+- `app.js` — UI: wybór efektu (‹ › lista) nie zmienia ekranu, dopiero AKTYWUJ; kości: kość → modyfikator −2…+6 → RZUĆ, animacja migających cyfr. Aktywna scena w localStorage. `dice.js` — notacja NdM, d%, kh/kl/dh/dl, stałe; crypto RNG z odrzucaniem.
 - `service-worker.js` — network-first z cache offline; nazwa cache `rpg-table-v1` podmieniana w CI na SHA.
-- `images/tavern.svg` to tylko placeholder.
+- UI: styl cyberpunk — zero zaokrągleń, pełnoszerokie paski góra/dół, dolny pasek w jednej linii (musi mieścić się na 375 px).
 
 ## Workflow
 1. Edycja.

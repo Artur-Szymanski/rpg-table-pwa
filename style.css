@@ -1,22 +1,38 @@
+/* Cyberpunk UI: hard edges, full-width top / bottom bars. Theme follows the active scene. */
 :root {
   --bg: #000;
-  --fg: #f2ead8;
-  --muted: #b9ad94;
-  --panel: rgba(12, 10, 8, 0.78);
-  --accent: #d9a441;
-  --accent-fg: #1a1205;
-  --border: rgba(242, 234, 216, 0.18);
+  --fg: #e8f6ff;
+  --muted: #7d93a3;
+  --panel: rgba(4, 6, 10, 0.82);
+  --accent: #00f0ff;
+  --accent2: #ff2a6d;
+  --accent-fg: #000;
+  --border: rgba(0, 240, 255, 0.35);
+  --ui-font: Consolas, "Roboto Mono", "Droid Sans Mono", ui-monospace, monospace;
+  --digit-font: var(--ui-font);
   color-scheme: dark;
 }
+body.theme-neon {
+  --accent: #ff2a9d;
+  --accent2: #00e5ff;
+  --border: rgba(255, 42, 157, 0.4);
+  --digit-font: Bahnschrift, "Roboto Condensed", sans-serif-condensed, "Arial Narrow", sans-serif;
+}
+body.theme-rain {
+  --accent: #8fb8ff;
+  --accent2: #ff7a3d;
+  --border: rgba(143, 184, 255, 0.35);
+  --digit-font: Bahnschrift, "Roboto Condensed", sans-serif-condensed, "Arial Narrow", sans-serif;
+}
 
-* { box-sizing: border-box; }
+* { box-sizing: border-box; border-radius: 0 !important; }
 
 html, body {
   margin: 0;
   height: 100%;
   background: var(--bg);
   color: var(--fg);
-  font: 16px/1.35 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font: 15px/1.3 var(--ui-font);
   overflow: hidden;
   overscroll-behavior: none;
   -webkit-tap-highlight-color: transparent;
@@ -38,115 +54,181 @@ html, body {
   inset: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
-           max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  justify-content: space-between;
   pointer-events: none;
-  transition: opacity 0.25s;
+  transition: opacity 0.2s;
 }
 #ui.hidden { opacity: 0; }
 #ui.hidden * { pointer-events: none !important; }
 #ui > * { pointer-events: auto; }
 
-.bar, .panel {
+/* --- Bars ------------------------------------------------------------------------------- */
+.bar {
+  width: 100%;
   background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 14px;
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-}
-.bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px;
-}
-
-button, select, input[type="text"] {
-  font: inherit;
-  color: var(--fg);
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  min-height: 44px;
-  padding: 0 12px;
-}
-button { cursor: pointer; }
-button:active { background: rgba(255, 255, 255, 0.16); }
-select { flex: 1; min-width: 0; }
-select option { background: #1a1611; }
-
-.intensity { padding: 6px 12px; }
-.intensity label { color: var(--muted); font-size: 14px; }
-.intensity input { flex: 1; accent-color: var(--accent); }
-
-#dice {
-  margin-top: auto;
-  padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  max-height: 55vh;
+  gap: 4px;
+  padding-left: max(6px, env(safe-area-inset-left));
+  padding-right: max(6px, env(safe-area-inset-right));
 }
-.dice-buttons {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
-  gap: 6px;
+.bar-top {
+  padding-top: max(6px, env(safe-area-inset-top));
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--accent);
+  box-shadow: 0 1px 12px -4px var(--accent);
 }
-.dice-buttons button { padding: 0 4px; font-size: 14px; }
-#dice-form { display: flex; gap: 6px; }
-#dice-form input { flex: 1; min-width: 0; }
-#dice-form button {
+.bar-bottom {
+  padding-top: 6px;
+  padding-bottom: max(6px, env(safe-area-inset-bottom));
+  border-top: 1px solid var(--accent);
+  box-shadow: 0 -1px 12px -4px var(--accent);
+}
+.row { display: flex; align-items: stretch; gap: 3px; }
+.row[hidden] { display: none; }
+
+button, select {
+  font: inherit;
+  color: var(--fg);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  min-height: 44px;
+  padding: 0 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+button { cursor: pointer; }
+button:active { background: var(--accent); color: var(--accent-fg); }
+select { flex: 1; min-width: 0; }
+select option { background: #05080c; }
+
+/* Primary actions: chamfered corners. */
+button.primary {
   background: var(--accent);
   color: var(--accent-fg);
-  border-color: transparent;
-  font-weight: 600;
+  border-color: var(--accent);
+  font-weight: 700;
+  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
 }
+button.primary:active { background: var(--fg); }
+#btn-activate.pending { animation: pending 1s steps(2) infinite; }
+@keyframes pending { 50% { background: var(--accent2); border-color: var(--accent2); } }
 
-#dice-history {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  overflow-y: auto;
-  font-size: 14px;
-  color: var(--muted);
-  max-height: 7.5em;
-}
-#dice-history li { display: flex; justify-content: space-between; gap: 12px; padding: 2px 4px; }
-#dice-history li b { color: var(--fg); }
-#dice-history li:first-child { color: var(--fg); }
+.intensity { align-items: center; gap: 8px; padding: 0 4px; }
+.intensity label { color: var(--muted); font-size: 12px; letter-spacing: 0.1em; }
+.intensity input { flex: 1; accent-color: var(--accent); height: 20px; }
 
+/* Dice row: everything on one line. */
+#dice-pick button, #dice-mod button { flex: 1 1 0; min-width: 0; padding: 0 2px; font-size: 14px; }
+#dice-mod button.on { background: var(--accent2); border-color: var(--accent2); color: #000; font-weight: 700; }
+#dice-mod #btn-back { flex: 0 0 34px; }
+#dice-mod #btn-roll { flex: 0 0 auto; padding: 0 10px; white-space: nowrap; }
+#roll-die { font-size: 11px; opacity: 0.75; }
+
+/* --- Roll result ------------------------------------------------------------------------ */
 #roll-result {
   position: fixed;
   left: 50%;
-  top: 38%;
+  top: 45%;
   transform: translate(-50%, -50%);
   text-align: center;
   pointer-events: none;
-  text-shadow: 0 0 24px #000, 0 0 8px #000;
+  z-index: 5;
 }
-#roll-result.show { animation: pop 2.6s ease-out forwards; }
-.roll-total { font-size: clamp(72px, 28vw, 180px); font-weight: 800; line-height: 1; }
-.roll-total.crit { color: #ffd36b; }
-.roll-total.fumble { color: #ff6b5b; }
-.roll-detail { font-size: 18px; color: var(--fg); opacity: 0.9; margin-top: 6px; }
+#roll-result.fade { animation: fade-out 0.6s ease-in 2.6s forwards; }
+@keyframes fade-out { to { opacity: 0; } }
 
-@keyframes pop {
-  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
-  10% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
-  18% { transform: translate(-50%, -50%) scale(1); }
-  80% { opacity: 1; }
-  100% { opacity: 0; }
+.roll-total {
+  position: relative;
+  font-family: var(--digit-font);
+  font-size: clamp(96px, 34vw, 220px);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg);
+}
+.roll-detail {
+  font-family: var(--ui-font);
+  font-size: 16px;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  margin-top: 8px;
+  text-shadow: 0 0 6px #000, 0 0 2px #000;
+  min-height: 1.3em;
+}
+.roll-total.crit { --hit: #fff36b; }
+.roll-total.fumble { --hit: #ff3b3b; }
+
+/* Glitch: RGB split slices, jitter while rolling. */
+.theme-glitch .roll-total { text-shadow: 3px 0 #ff2a6d, -3px 0 #00f0ff, 0 0 18px rgba(0, 0, 0, 0.9); color: var(--hit, #fff); }
+.theme-glitch .roll-total::before,
+.theme-glitch .roll-total::after {
+  content: attr(data-text);
+  position: absolute; inset: 0;
+  color: var(--hit, #fff);
+}
+.theme-glitch .roll-total::before { text-shadow: -4px 0 #ff2a6d; clip-path: inset(10% 0 60% 0); transform: translateX(-6px); }
+.theme-glitch .roll-total::after  { text-shadow: 4px 0 #00f0ff;  clip-path: inset(62% 0 12% 0); transform: translateX(6px); }
+.theme-glitch .rolling .roll-total { animation: glitch-jitter 0.12s steps(2) infinite; }
+.theme-glitch .rolling .roll-total::before { animation: glitch-slice 0.2s steps(3) infinite; }
+.theme-glitch .rolling .roll-total::after { animation: glitch-slice 0.17s steps(3) infinite reverse; }
+.theme-glitch .settled .roll-total { animation: glitch-land 0.35s steps(4) 1; }
+.theme-glitch .settled .roll-total::before,
+.theme-glitch .settled .roll-total::after { animation: glitch-slice 0.3s steps(3) 1; opacity: 0.0; transition: opacity 0.3s 0.3s; }
+@keyframes glitch-jitter {
+  0% { transform: translate(2px, -1px); } 50% { transform: translate(-3px, 2px) skewX(-6deg); } 100% { transform: translate(1px, 1px); }
+}
+@keyframes glitch-slice {
+  0% { clip-path: inset(5% 0 70% 0); transform: translateX(-10px); }
+  33% { clip-path: inset(40% 0 35% 0); transform: translateX(8px); }
+  66% { clip-path: inset(75% 0 5% 0); transform: translateX(-5px); }
+  100% { clip-path: inset(20% 0 55% 0); transform: translateX(12px); }
+}
+@keyframes glitch-land {
+  0% { transform: scale(1.25) skewX(12deg); filter: blur(2px); }
+  50% { transform: scale(0.95) translateX(-6px); }
+  100% { transform: none; filter: none; }
+}
+
+/* Neon: thin tube glow, flickers while rolling, ignites on the result. */
+.theme-neon .roll-total {
+  font-weight: 300;
+  color: #fff;
+  text-shadow: 0 0 4px #fff, 0 0 12px var(--hit, var(--accent)), 0 0 28px var(--hit, var(--accent)), 0 0 60px var(--hit, var(--accent));
+}
+.theme-neon .roll-detail { color: var(--accent2); text-shadow: 0 0 8px var(--accent2); }
+.theme-neon .rolling .roll-total { animation: neon-hum 0.15s steps(2) infinite; opacity: 0.75; }
+.theme-neon .settled .roll-total { animation: neon-ignite 0.7s linear 1; }
+@keyframes neon-hum { 50% { opacity: 0.35; } }
+@keyframes neon-ignite {
+  0%, 18%, 30%, 52% { opacity: 1; }
+  10%, 24%, 44% { opacity: 0.15; }
+  100% { opacity: 1; }
+}
+
+/* Rain: cold, wet, blurred while rolling, drips into focus. */
+.theme-rain .roll-total {
+  color: #dfe9ff;
+  text-shadow: 0 0 10px rgba(143, 184, 255, 0.8), 0 6px 14px rgba(143, 184, 255, 0.45), 0 18px 30px rgba(143, 184, 255, 0.25);
+}
+.theme-rain .roll-total.crit, .theme-rain .roll-total.fumble { color: var(--hit); }
+.theme-rain .rolling .roll-total { filter: blur(3px); animation: rain-fall 0.1s linear infinite; opacity: 0.8; }
+.theme-rain .settled .roll-total { animation: rain-focus 0.5s ease-out 1; }
+@keyframes rain-fall { from { transform: translateY(-6px); } to { transform: translateY(6px); } }
+@keyframes rain-focus {
+  0% { filter: blur(6px); transform: translateY(-14px); opacity: 0.4; }
+  100% { filter: none; transform: none; opacity: 1; }
 }
 
 #error {
   position: fixed;
-  left: 12px; right: 12px; top: 80px;
+  left: 8px; right: 8px; top: 110px;
   padding: 12px;
-  background: #3a0d0d;
-  border: 1px solid #a33;
-  border-radius: 10px;
-  font: 13px/1.4 ui-monospace, Consolas, monospace;
+  background: #2a0610;
+  border: 1px solid #ff2a6d;
+  font: 13px/1.4 var(--ui-font);
   white-space: pre-wrap;
   max-height: 50vh;
   overflow: auto;

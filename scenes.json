@@ -1,35 +1,24 @@
 {
   "scenes": [
     {
-      "id": "tavern-fire",
-      "name": "Tavern (fire glow)",
-      "image": "images/tavern.svg",
-      "shader": "shaders/image_fire_glow.frag",
+      "id": "glitch",
+      "name": "Glitch / noise",
+      "shader": "shaders/glitch_noise.frag",
+      "theme": "glitch",
       "intensity": 1.0
     },
     {
-      "id": "black-fog",
-      "name": "Black fog",
-      "shader": "shaders/black_fog.frag",
+      "id": "neon-drive",
+      "name": "Neon drive",
+      "shader": "shaders/neon_drive.frag",
+      "theme": "neon",
       "intensity": 1.0
     },
     {
-      "id": "embers",
-      "name": "Embers",
-      "shader": "shaders/embers.frag",
-      "intensity": 1.0
-    },
-    {
-      "id": "arcane-portal",
-      "name": "Arcane portal",
-      "shader": "shaders/arcane_portal.frag",
-      "intensity": 1.0
-    },
-    {
-      "id": "tavern-plain",
-      "name": "Tavern (static image)",
-      "image": "images/tavern.svg",
-      "shader": "shaders/image.frag",
+      "id": "rain-sky",
+      "name": "Rain sky",
+      "shader": "shaders/rain_sky.frag",
+      "theme": "rain",
       "intensity": 1.0
     }
   ]
