@@ -20,9 +20,9 @@ PWA na telefon z Androidem (Chrome) do sesji papierowego RPG: pełnoekranowe gra
 
 ## Workflow
 1. Edycja.
-2. Test lokalny: `powershell -ExecutionPolicy Bypass -File tools\serve.ps1 [-Port 8080]` i podgląd w przeglądarce wbudowanej z presetem mobile 375×812 (sprawdź konsolę pod kątem błędów kompilacji shaderów). Jeśli port 8080 zajęty, użyj innego.
-3. Commit (z atrybucją Co-Authored-By) → push na `main`.
-4. GitHub Actions (`.github/workflows/pages.yml`): walidacja `scenes.json` (istnienie plików, unikalne id), kopiowanie do `_site`, podmiana wersji cache SW, wdrożenie Pages. Sprawdź: `gh run list` / `gh run watch`. `gh` jest w `C:\Program Files\GitHub CLI\gh.exe` (może nie być w PATH).
+2. Test lokalny: panel podglądu w aplikacji Claude — `preview_start` z konfiguracją `rpg-table` (`.claude/launch.json`, port 8090), ewentualnie preset mobile 375×812. Serwer (`tools\serve.ps1`) wstrzykuje do index.html skrypt live reload (odpytuje `/__livereload`), więc po każdej zmianie pliku strona sama się przeładowuje. Sprawdzaj konsolę pod kątem błędów kompilacji shaderów. Port 8080 bywa zajęty przez stary serwer.
+3. Commit (z atrybucją Co-Authored-By) → push na `main` (push NIE wdraża).
+4. Wdrożenie tylko przy znaczącym kamieniu milowym i na prośbę użytkownika: `gh workflow run pages.yml`, potem `gh run watch`. Workflow: walidacja `scenes.json`, kopiowanie do `_site`, podmiana wersji cache SW, wdrożenie Pages. `gh` jest w `C:\Program Files\GitHub CLI\gh.exe` (może nie być w PATH). Nie trzeba testować każdej wersji na telefonie.
 
 Uwaga: nowy plik lub katalog najwyższego poziomu trzeba dopisać do kroku `cp` w `pages.yml`.
 

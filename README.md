@@ -39,8 +39,8 @@ z uwagą na kolejność macierzy).
 ```
 powershell -ExecutionPolicy Bypass -File tools\serve.ps1
 ```
-Potem `http://localhost:8080/`.
+Potem `http://localhost:8080/`. Serwer ma wbudowane automatyczne odświeżanie: po zapisaniu dowolnego pliku strona przeładowuje się sama (ostatnia scena jest zapamiętana).
 
 ## Publikacja
-Każdy push na `main` uruchamia GitHub Actions (`.github/workflows/pages.yml`): sprawdzenie `scenes.json`,
+Wdrożenie robimy tylko przy kamieniach milowych, ręcznie: `gh workflow run pages.yml` (albo przycisk „Run workflow” w zakładce Actions). Push na `main` niczego nie wdraża. Workflow (`.github/workflows/pages.yml`) robi: sprawdzenie `scenes.json`,
 a potem wdrożenie na GitHub Pages. Wersja cache service workera zmienia się przy każdym wdrożeniu.

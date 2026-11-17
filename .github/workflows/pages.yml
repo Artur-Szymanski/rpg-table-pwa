@@ -1,8 +1,7 @@
 name: Deploy to GitHub Pages
 
+# Deploys only on demand (milestones): gh workflow run pages.yml
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
