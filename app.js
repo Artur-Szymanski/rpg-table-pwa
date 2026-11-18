@@ -60,6 +60,7 @@
       renderer.intensity = intensity;
       $('intensity').value = intensity;
       document.body.className = 'theme-' + (scene.theme || 'glitch');
+      updateLampLight();
     } catch (e) {
       showError(scene.name + ': ' + (e.message || e));
     }
@@ -73,8 +74,25 @@
     enterFullscreen();
     activateScene(selected);
   });
+  // Light colour of the Lamp scene (same black-body curve as shaders/lamp.frag), used for the
+  // bright rim around the dark result digits.
+  function lampLight(I) {
+    const k = I < 1 ? 1200 + 1500 * I : 2700 + 3800 * (I - 1);
+    const t = k / 100;
+    const cl = (v) => Math.min(1, Math.max(0, v));
+    const r = t <= 66 ? 1 : cl(1.292936 * Math.pow(t - 60, -0.1332047592));
+    const g = t <= 66 ? cl(0.3900815788 * Math.log(t) - 0.6318414438) : cl(1.129890861 * Math.pow(t - 60, -0.0755148492));
+    const b = t >= 66 ? 1 : t <= 19 ? 0 : cl(0.5432067891 * Math.log(t - 10) - 1.1962540891);
+    const tone = (c) => Math.round(255 * (1 - Math.exp(-c * 2.6))); // like the bright centre of the panel
+    return 'rgb(' + tone(r) + ',' + tone(g) + ',' + tone(b) + ')';
+  }
+  function updateLampLight() {
+    document.body.style.setProperty('--lamp-light', lampLight(renderer.intensity));
+  }
+
   $('intensity').addEventListener('input', (e) => {
     renderer.intensity = parseFloat(e.target.value);
+    updateLampLight();
     if (active < 0) return;
     savedIntensity[scenes[active].id] = renderer.intensity;
     store(INTENSITY_KEY, savedIntensity);
@@ -152,7 +170,7 @@
     clearTimeout(rollTimer);
     result.hidden = false;
     result.className = 'rolling';
-    totalEl.classList.remove('crit', 'fumble');
+    totalEl.classList.remove('crit', 'fumble', 'word');
     detailEl.textContent = 'd' + die + ' ' + signed(mod);
     const start = performance.now();
     const duration = 750;
@@ -163,10 +181,13 @@
         rollTimer = setTimeout(tick, 35 + 110 * (elapsed / duration) ** 2);
         return;
       }
-      setTotal(String(r.total));
+      // Natural 20 / natural 1 on a d20 show a word instead of the number.
+      const word = die === 20 ? (natural === 20 ? 'CRIT!' : natural === 1 ? 'FAIL!' : '') : '';
+      setTotal(word || String(r.total));
       totalEl.classList.toggle('crit', r.crit);
       totalEl.classList.toggle('fumble', r.fumble);
-      detailEl.textContent = 'd' + die + ' [' + natural + ']' + (mod ? ' ' + signed(mod) : '');
+      totalEl.classList.toggle('word', !!word);
+      detailEl.textContent = 'd' + die + ' [' + natural + ']' + (mod ? ' ' + signed(mod) + ' = ' + r.total : '');
       result.className = '';
       void result.offsetWidth; // restart animations
       result.className = 'settled';
@@ -174,6 +195,12 @@
     };
     tick();
   }
+
+  // Keep the roll breakdown just above the bottom bar, whatever its height.
+  const footer = $('dice');
+  const syncBarHeight = () => document.body.style.setProperty('--bottom-bar-h', footer.offsetHeight + 'px');
+  if ('ResizeObserver' in window) new ResizeObserver(syncBarHeight).observe(footer);
+  syncBarHeight();
 
   // --- Boot ---------------------------------------------------------------------------------
   async function boot() {

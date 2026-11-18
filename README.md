@@ -12,6 +12,8 @@ na pełnym ekranie i działa offline.
 - **Dolny pasek (kości)**: wybierz kość (d4–d100), potem modyfikator −2…+6 i **RZUĆ**; ↩ wraca do wyboru kości.
   Przez chwilę migają losowe liczby, potem wynik, który zostaje na ekranie do ↩, kolejnego rzutu albo aktywacji
   innego efektu. Krój i efekt cyfr zależą od motywu aktywnego efektu (czcionki w `fonts/`, licencja SIL OFL).
+  Na k20 naturalna 20 pokazuje **CRIT!**, a naturalna 1 czerwony neon **FAIL!**. Opis rzutu (np. `d20 [14] +4 = 18`)
+  jest tuż nad dolnym paskiem, żeby środek ekranu był czysty.
 
 Losowanie: `crypto.getRandomValues` z odrzucaniem, więc bez przekłamań rozkładu.
 

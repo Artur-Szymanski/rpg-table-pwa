@@ -142,12 +142,17 @@ button.primary:active { background: var(--fg); }
 /* --- Roll result ------------------------------------------------------------------------ */
 #roll-result {
   position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+.roll-center {
+  position: absolute;
   left: 50%;
   top: 45%;
   transform: translate(-50%, -50%);
   text-align: center;
-  pointer-events: none;
-  z-index: 5;
+  white-space: nowrap;
 }
 
 .roll-total {
@@ -159,17 +164,38 @@ button.primary:active { background: var(--fg); }
   font-variant-numeric: tabular-nums;
   color: var(--fg);
 }
+/* Small roll breakdown sits just above the bottom bar, keeping the centre clear. */
 .roll-detail {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: calc(var(--bottom-bar-h, 64px) + 10px);
+  text-align: center;
   font-family: var(--ui-font);
   font-size: 16px;
   letter-spacing: 0.1em;
   color: var(--accent);
-  margin-top: 8px;
   text-shadow: 0 0 6px #000, 0 0 2px #000;
-  min-height: 1.3em;
 }
 .roll-total.crit { --hit: #fff36b; }
 .roll-total.fumble { --hit: #ff3b3b; }
+
+/* Natural 20 / natural 1 on a d20: a word instead of the number. */
+.roll-total.word { font-size: clamp(64px, 22vw, 160px); letter-spacing: 0.02em; }
+body .roll-total.word.fumble {
+  font-family: "Tilt Neon", var(--digit-font);
+  font-weight: 400;
+  color: #ffe6e6;
+  -webkit-text-stroke: 0;
+  text-shadow: 0 0 3px #fff, 0 0 10px #ff2020, 0 0 24px #ff1a1a, 0 0 50px #ff0000, 0 0 90px #c00000;
+}
+/* On the bright lamp the tube needs a dark backing to read as neon. */
+body.theme-lamp .roll-total.word.fumble {
+  -webkit-text-stroke: 7px #1a0000;
+  paint-order: stroke fill;
+  text-shadow: 0 0 3px #fff, 0 0 10px #ff2020, 0 0 24px #ff1a1a, 0 0 40px #500000, 0 0 70px #000;
+}
+body .roll-total.word.fumble::before, body .roll-total.word.fumble::after { display: none; }
+body .settled .roll-total.word.fumble { animation: neon-ignite 0.9s linear 1; }
 
 /* Glitch: RGB split slices, jitter while rolling. */
 .theme-glitch .roll-total { font-weight: 400; text-shadow: 3px 0 #ff2a6d, -3px 0 #00f0ff, 0 0 18px rgba(0, 0, 0, 0.9); color: var(--hit, #fff); }
@@ -213,15 +239,18 @@ button.primary:active { background: var(--fg); }
 .theme-neon .settled .roll-total { animation: neon-ignite 0.7s linear 1; }
 @keyframes neon-hum { 50% { opacity: 0.35; } }
 
-/* Lamp: dark digits silhouetted against the bright glowing panel. */
+/* Lamp: dark digits backlit by the panel - a bright rim in the lamp's own light colour
+   (--lamp-light, set from the colour temperature in app.js) glowing around them. */
 .theme-lamp .roll-total {
   font-weight: 800;
   color: #120600;
-  text-shadow: 0 0 1px #000, 0 0 24px rgba(255, 190, 110, 0.7);
+  -webkit-text-stroke: 5px var(--lamp-light, #ffd9a0);
+  paint-order: stroke fill;
+  text-shadow: 0 0 4px var(--lamp-light, #ffd9a0), 0 0 14px var(--lamp-light, #ffd9a0), 0 0 40px var(--lamp-light, #ffd9a0);
 }
-.theme-lamp .roll-total.crit { color: #7a4a00; }
+.theme-lamp .roll-total.crit { color: #2e1800; }
 .theme-lamp .roll-total.fumble { color: #6e0a00; }
-.theme-lamp .roll-detail { color: rgba(30, 12, 0, 0.85); text-shadow: 0 0 6px rgba(255, 210, 150, 0.8); }
+.theme-lamp .roll-detail { color: #1e0c00; text-shadow: 0 0 4px var(--lamp-light, #ffd9a0), 0 0 10px var(--lamp-light, #ffd9a0); }
 .theme-lamp .rolling .roll-total { animation: neon-hum 0.15s steps(2) infinite; }
 .theme-lamp .settled .roll-total { animation: rain-focus 0.5s ease-out 1; }
 @keyframes neon-ignite {
