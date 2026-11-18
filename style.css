@@ -114,6 +114,10 @@ button, select {
 button { cursor: pointer; }
 button:active { background: var(--accent); color: var(--accent-fg); }
 select { flex: 1; min-width: 0; }
+/* Top row: tight arrows and the photos / effects switch, so the picker keeps room on 375 px. */
+.bar-top .row:first-child button { padding: 0 8px; }
+#btn-prev, #btn-next { flex: 0 0 34px; padding: 0 !important; }
+#btn-mode { flex: 0 0 auto; color: var(--accent); border-color: var(--accent); font-size: 13px; }
 select option { background: #05080c; }
 
 /* Primary actions: chamfered corners. */

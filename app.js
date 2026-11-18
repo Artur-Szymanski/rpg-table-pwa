@@ -38,11 +38,33 @@
   }
 
   // --- Scenes: browsing only changes the selection; "Aktywuj" applies it ---------------------
+  // The picker shows either effects (scenes without an image) or photos (scenes with an image).
+  // The mode button names the other list, so effects are always one tap away.
+  const modeBtn = $('btn-mode');
+  let mode = 'effects';
+  const isPhoto = (s) => !!s.image;
+  const inMode = (i) => (mode === 'photos') === isPhoto(scenes[i]);
+  let list = []; // scene indices in the current mode
+
+  function setMode(next) {
+    mode = next;
+    list = scenes.map((_, i) => i).filter(inMode);
+    select.replaceChildren(...list.map((i) => new Option(scenes[i].name, String(i))));
+    select.disabled = !list.length;
+    modeBtn.textContent = mode === 'photos' ? 'Effects' : 'Photos';
+    if (list.length) selectScene(list.includes(active) ? active : list[0]);
+  }
+
   function selectScene(index) {
-    if (!scenes.length) return;
-    selected = (index + scenes.length) % scenes.length;
+    if (!list.length) return;
+    selected = index;
     select.value = String(selected);
     activateBtn.classList.toggle('pending', selected !== active);
+  }
+  function stepScene(dir) {
+    if (!list.length) return;
+    const pos = list.indexOf(selected);
+    selectScene(list[(pos + dir + list.length) % list.length]);
   }
 
   async function activateScene(index) {
@@ -67,10 +89,12 @@
     selectScene(selected);
   }
 
-  $('btn-prev').addEventListener('click', () => selectScene(selected - 1));
-  $('btn-next').addEventListener('click', () => selectScene(selected + 1));
+  $('btn-prev').addEventListener('click', () => stepScene(-1));
+  $('btn-next').addEventListener('click', () => stepScene(1));
+  modeBtn.addEventListener('click', () => setMode(mode === 'photos' ? 'effects' : 'photos'));
   select.addEventListener('change', () => selectScene(parseInt(select.value, 10)));
   activateBtn.addEventListener('click', () => {
+    if (!list.length) return;
     enterFullscreen();
     activateScene(selected);
   });
@@ -216,10 +240,11 @@
     // Load bundled fonts up front so the first roll already uses them.
     if (document.fonts) ['Share Tech Mono', 'Tilt Neon', 'Orbitron'].forEach((f) => document.fonts.load('700 40px "' + f + '"', '0123456789').catch(() => {}));
 
-    select.replaceChildren(...scenes.map((s, i) => new Option(s.name, String(i))));
     const savedIndex = scenes.findIndex((s) => s.id === load(SCENE_KEY, null));
-    selected = savedIndex >= 0 ? savedIndex : 0;
-    activateScene(selected);
+    const start = savedIndex >= 0 ? savedIndex : 0;
+    setMode(isPhoto(scenes[start]) ? 'photos' : 'effects');
+    selectScene(start);
+    activateScene(start);
   }
   boot();
 
