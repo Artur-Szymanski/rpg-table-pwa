@@ -37,7 +37,8 @@
       "image": "images/car01.webp",
       "theme": "neon",
       "intensity": 1.0,
-      "scanlines": 0.3
+      "scanlines": 0.3,
+      "aberration": 0
     }
   ]
 }
