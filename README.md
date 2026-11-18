@@ -19,7 +19,9 @@ Losowanie: `crypto.getRandomValues` z odrzucaniem, więc bez przekłamań rozkł
 
 ## Dodawanie scen
 1. Grafikę wrzuć do `images/` (JPG / PNG / WebP, najlepiej ≤ 2048 px po dłuższym boku).
-2. Shader dodaj do `shaders/` jako plik `.frag` w konwencji Shadertoy:
+   Dla zwykłego zdjęcia wystarczy shader `shaders/photo_glitch.frag` (co kilka sekund delikatny glitch
+   z rozjeżdżającą się aberracją; INT = siła i częstotliwość, 0 = czyste zdjęcie), np. scena `PHOTO_Car01`.
+2. Własny shader dodaj do `shaders/` jako plik `.frag` w konwencji Shadertoy:
    ```glsl
    void mainImage(out vec4 fragColor, in vec2 fragCoord) { ... }
    ```

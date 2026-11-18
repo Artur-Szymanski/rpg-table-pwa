@@ -29,6 +29,15 @@
       "intensity": 1.0,
       "scanlines": 0,
       "aberration": 0.4
+    },
+    {
+      "id": "photo-car01",
+      "name": "PHOTO_Car01",
+      "shader": "shaders/photo_glitch.frag",
+      "image": "images/car01.webp",
+      "theme": "neon",
+      "intensity": 1.0,
+      "scanlines": 0.3
     }
   ]
 }
