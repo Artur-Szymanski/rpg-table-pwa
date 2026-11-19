@@ -23,7 +23,7 @@ PWA na telefon z Androidem (Chrome) do sesji papierowego RPG w klimacie Cyberpun
 1. Edycja.
 2. Test lokalny: panel podglądu w aplikacji Claude — `preview_start` z konfiguracją `rpg-table` (`.claude/launch.json`, port 8090), ewentualnie preset mobile 375×812. Serwer (`tools\serve.ps1`) wstrzykuje do index.html skrypt live reload (odpytuje `/__livereload`), więc po każdej zmianie pliku strona sama się przeładowuje. Sprawdzaj konsolę pod kątem błędów kompilacji shaderów. Port 8080 bywa zajęty przez stary serwer.
 3. Commit (z atrybucją Co-Authored-By) → push na `main` (push NIE wdraża).
-4. Wdrożenie tylko przy znaczącym kamieniu milowym i na prośbę użytkownika: `gh workflow run pages.yml`, potem `gh run watch`. Workflow: walidacja `scenes.json`, kopiowanie do `_site`, podmiana wersji cache SW, wdrożenie Pages. `gh` jest w `C:\Program Files\GitHub CLI\gh.exe` (może nie być w PATH). Nie trzeba testować każdej wersji na telefonie.
+4. Wdrożenie tylko przy znaczącym kamieniu milowym i na prośbę użytkownika: `gh workflow run pages.yml`, potem `gh run watch`. Workflow ma dwa joby: `build` (walidacja `scenes.json`, kopiowanie do `_site`, podmiana wersji cache SW, upload artefaktu) i `deploy` (wdrożenie Pages) — rozdzielone, bo deploy w tym samym jobie nie widział świeżo wgranego artefaktu. `gh` jest w `C:\Program Files\GitHub CLI\gh.exe` (może nie być w PATH). Nie trzeba testować każdej wersji na telefonie.
 
 Uwaga: nowy plik lub katalog najwyższego poziomu trzeba dopisać do kroku `cp` w `pages.yml`.
 
