@@ -33,11 +33,111 @@
       "aberration": 0.4
     },
     {
-      "id": "photo-car01",
-      "name": "PHOTO_Car01",
+      "id": "01-bar",
+      "name": "01_Bar",
       "shader": "shaders/photo_glitch.frag",
-      "image": "images/car01.webp",
+      "image": "images/01_bar.webp",
       "theme": "neon",
+      "intensity": 1.0,
+      "scanlines": 0.3,
+      "aberration": 0
+    },
+    {
+      "id": "02-car",
+      "name": "02_Car",
+      "shader": "shaders/photo_glitch.frag",
+      "image": "images/02_car.webp",
+      "theme": "neon",
+      "intensity": 1.0,
+      "scanlines": 0.3,
+      "aberration": 0
+    },
+    {
+      "id": "03-woman",
+      "name": "03_Woman",
+      "shader": "shaders/photo_glitch.frag",
+      "image": "images/03_woman.webp",
+      "theme": "neon",
+      "intensity": 1.0,
+      "scanlines": 0.3,
+      "aberration": 0
+    },
+    {
+      "id": "04-residential",
+      "name": "04_Residential",
+      "shader": "shaders/photo_glitch.frag",
+      "image": "images/04_residential.webp",
+      "theme": "rain",
+      "intensity": 1.0,
+      "scanlines": 0.3,
+      "aberration": 0
+    },
+    {
+      "id": "05-punks",
+      "name": "05_Punks",
+      "shader": "shaders/photo_glitch.frag",
+      "image": "images/05_punks.webp",
+      "theme": "glitch",
+      "intensity": 1.0,
+      "scanlines": 0.3,
+      "aberration": 0
+    },
+    {
+      "id": "06-cyberninja",
+      "name": "06_CyberNinja",
+      "shader": "shaders/photo_glitch.frag",
+      "image": "images/06_cyberninja.webp",
+      "theme": "glitch",
+      "intensity": 1.0,
+      "scanlines": 0.3,
+      "aberration": 0
+    },
+    {
+      "id": "07-medicalcenter",
+      "name": "07_MedicalCenter",
+      "shader": "shaders/photo_glitch.frag",
+      "image": "images/07_medicalcenter.webp",
+      "theme": "rain",
+      "intensity": 1.0,
+      "scanlines": 0.3,
+      "aberration": 0
+    },
+    {
+      "id": "08-hideyoshisan",
+      "name": "08_HideyoshiSan",
+      "shader": "shaders/photo_glitch.frag",
+      "image": "images/08_hideyoshisan.webp",
+      "theme": "neon",
+      "intensity": 1.0,
+      "scanlines": 0.3,
+      "aberration": 0
+    },
+    {
+      "id": "09-weapons",
+      "name": "09_Weapons",
+      "shader": "shaders/photo_glitch.frag",
+      "image": "images/09_weapons.webp",
+      "theme": "glitch",
+      "intensity": 1.0,
+      "scanlines": 0.3,
+      "aberration": 0
+    },
+    {
+      "id": "10-drone",
+      "name": "10_Drone",
+      "shader": "shaders/photo_glitch.frag",
+      "image": "images/10_drone.webp",
+      "theme": "rain",
+      "intensity": 1.0,
+      "scanlines": 0.3,
+      "aberration": 0
+    },
+    {
+      "id": "11-battledroid",
+      "name": "11_BattleDroid",
+      "shader": "shaders/photo_glitch.frag",
+      "image": "images/11_battledroid.webp",
+      "theme": "glitch",
       "intensity": 1.0,
       "scanlines": 0.3,
       "aberration": 0
