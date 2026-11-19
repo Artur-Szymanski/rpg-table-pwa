@@ -28,5 +28,4 @@ PWA na telefon z Androidem (Chrome) do sesji papierowego RPG w klimacie Cyberpun
 Uwaga: nowy plik lub katalog najwyższego poziomu trzeba dopisać do kroku `cp` w `pages.yml`.
 
 ## Znane drobiazgi
-- Ostrzeżenie Actions o przestarzałym Node 20 w akcjach (checkout@v4, configure-pages@v5, upload-pages-artifact@v3, deploy-pages@v4) — zaktualizować przy okazji.
 - Na fizycznym telefonie jeszcze nietestowane.
