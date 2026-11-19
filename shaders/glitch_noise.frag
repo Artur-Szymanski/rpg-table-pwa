@@ -53,12 +53,12 @@ vec3 barBlocks(vec2 uv, float t, float I, out float cover) {
   return col;
 }
 
-vec3 field(vec2 uv, float t, float I) {
+// Background field (lines + drifting bands). Expensive, so it is evaluated once per pixel;
+// only the cheap bar blocks are sampled per colour channel for the fringes.
+vec3 background(vec2 uv, float t, float I) {
   vec3 col;
   float lineY = floor(uv.y * iResolution.y / 3.0);
-  if (iChannel0Size.x > 1.5) {
-    col = sampleCover(clamp(uv, 0.0, 1.0)).rgb;
-  } else {
+  {
     // Dark field of thin horizontal lines with slowly varying brightness.
     float tick = floor(t * 15.0);
     float n = vnoise(vec2(uv.x * 2.5 + t * 0.7, lineY * 0.15 + t * 2.0));
@@ -73,15 +73,18 @@ vec3 field(vec2 uv, float t, float I) {
       float w = 0.01 + 0.05 * hash11(jump + fi * 5.0);
       float d = (uv.y - cy) / w;
       float g = exp(-d * d);
+      if (g < 0.01) continue;                                 // skip the noise far from the band
       float sx = smoothstep(0.1, 0.7, vnoise(vec2(uv.x * 3.0 - t * (1.0 + fi), fi * 7.0 + jump)));
       col += bandRamp(clamp(0.5 + d * 0.25, 0.0, 1.0)) * g * sx * 0.28 * I;
     }
   }
+  return col;
+}
 
+float barsChannel(vec2 uv, float t, float I, float base, int ch) {
   float cover;
   vec3 bars = barBlocks(uv, t, I, cover);
-  col = mix(col, bars, cover);
-  return col;
+  return mix(base, bars[ch], cover);
 }
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
@@ -114,7 +117,14 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
   // Chroma shift gives the colour fringes on bar blocks and edges.
   float ca = (0.005 + 0.015 * burst) * I;
-  vec3 col = vec3(field(suv + vec2(ca, 0.0), t, I).r, field(suv, t, I).g, field(suv - vec2(ca * 1.5, 0.0), t, I).b);
+  vec2 uvR = suv + vec2(ca, 0.0), uvB = suv - vec2(ca * 1.5, 0.0);
+  vec3 bg;
+  if (iChannel0Size.x > 1.5) {
+    bg = vec3(sampleCover(clamp(uvR, 0.0, 1.0)).r, sampleCover(clamp(suv, 0.0, 1.0)).g, sampleCover(clamp(uvB, 0.0, 1.0)).b);
+  } else {
+    bg = background(suv, t, I);   // dark and soft: no visible difference without the per-channel shift
+  }
+  vec3 col = vec3(barsChannel(uvR, t, I, bg.r, 0), barsChannel(suv, t, I, bg.g, 1), barsChannel(uvB, t, I, bg.b, 2));
 
   // Thin RGB-split lines: red, green and blue copies a few pixels apart.
   float lpx = iResolution.y / 3.0;

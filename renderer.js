@@ -147,6 +147,8 @@ void main() {
       opts = opts || {};
       this.scanlines = typeof opts.scanlines === 'number' ? opts.scanlines : POST_DEFAULTS.scanlines;
       this.aberration = typeof opts.aberration === 'number' ? opts.aberration : POST_DEFAULTS.aberration;
+      // Heavy scenes can render at a fraction of the screen resolution; the post pass upscales.
+      this.renderScale = typeof opts.renderScale === 'number' ? Math.min(Math.max(opts.renderScale, 0.25), 1) : 1;
     }
 
     _link(vsSrc, fsSrc) {
@@ -222,12 +224,14 @@ void main() {
       const gl = this.gl;
       this._resize();
       const W = this.canvas.width, H = this.canvas.height;
-      const usePost = this.scanlines > 0 || this.aberration > 0;
+      const scale = this.renderScale || 1;
+      const usePost = this.scanlines > 0 || this.aberration > 0 || scale < 1;
+      const SW = Math.max(1, Math.round(W * scale)), SH = Math.max(1, Math.round(H * scale));
       if (usePost) {
-        this._ensureTarget(W, H);
+        this._ensureTarget(SW, SH);
         gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo);
       }
-      gl.viewport(0, 0, W, H);
+      gl.viewport(0, 0, usePost ? SW : W, usePost ? SH : H);
       gl.useProgram(this.program);
       gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
       gl.enableVertexAttribArray(0);
@@ -236,7 +240,7 @@ void main() {
       gl.bindTexture(gl.TEXTURE_2D, this.texture);
 
       const u = this.uniforms;
-      gl.uniform3f(u.iResolution, this.canvas.width, this.canvas.height, 1);
+      gl.uniform3f(u.iResolution, usePost ? SW : W, usePost ? SH : H, 1);
       gl.uniform1f(u.iTime, (now - this.startTime) / 1000);
       gl.uniform1f(u.iTimeDelta, (now - this.lastTime) / 1000);
       gl.uniform1i(u.iFrame, this.frame++);
@@ -248,6 +252,7 @@ void main() {
 
       if (usePost) {
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.viewport(0, 0, W, H);
         gl.useProgram(this.post);
         gl.activeTexture(gl.TEXTURE1);
         gl.bindTexture(gl.TEXTURE_2D, this.fboTex);

@@ -5,7 +5,8 @@
       "name": "Glitch / noise",
       "shader": "shaders/glitch_noise.frag",
       "theme": "glitch",
-      "intensity": 1.0
+      "intensity": 1.0,
+      "renderScale": 0.75
     },
     {
       "id": "neon-drive",
@@ -19,7 +20,8 @@
       "name": "Rain sky",
       "shader": "shaders/rain_sky.frag",
       "theme": "rain",
-      "intensity": 1.0
+      "intensity": 1.0,
+      "renderScale": 0.6
     },
     {
       "id": "lamp",

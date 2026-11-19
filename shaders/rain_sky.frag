@@ -14,25 +14,34 @@ float vnoise(vec2 p) {
   return mix(mix(hash12(i), hash12(i + vec2(1, 0)), u.x),
              mix(hash12(i + vec2(0, 1)), hash12(i + vec2(1, 1)), u.x), u.y);
 }
-float fbm(vec2 p) {
+// low: sum of the first octaves only (smooth, used for the lighting gradient).
+float fbm(vec2 p, out float low) {
   float s = 0.0, a = 0.5;
-  for (int i = 0; i < 5; i++) { s += a * vnoise(p); p = p * 2.02 + 17.1; a *= 0.5; }
+  low = 0.0;
+  for (int i = 0; i < 5; i++) {
+    s += a * vnoise(p); p = p * 2.02 + 17.1; a *= 0.5;
+    if (i == 2) low = s;
+  }
   return s;
+}
+// Cheap low-frequency fbm for the domain warp (fine detail is not visible there).
+float fbm3(vec2 p) {
+  float s = 0.0, a = 0.5;
+  for (int i = 0; i < 3; i++) { s += a * vnoise(p); p = p * 2.02 + 17.1; a *= 0.5; }
+  return s * 1.15;
 }
 
 // --- Sky behind the lens -----------------------------------------------------------------
 
-float cloudDensity(vec2 q, float t) {
+float cloudDensity(vec2 q, float t, out float low) {
   vec2 c = q * (1.0 + 0.35 * dot(q, q)) * 2.2;   // dome-like perspective
-  vec2 warp = vec2(fbm(c * 1.3 + vec2(t * 0.05, 0.0)), fbm(c * 1.3 + vec2(5.2, -t * 0.04)));
-  return fbm(c + 0.8 * warp + vec2(t * 0.02, t * 0.012));
+  vec2 warp = vec2(fbm3(c * 1.3 + vec2(t * 0.05, 0.0)), fbm3(c * 1.3 + vec2(5.2, -t * 0.04)));
+  return fbm(c + 0.8 * warp + vec2(t * 0.02, t * 0.012), low);
 }
 
 // Rain streaks radiating from the vanishing point (drops falling toward the viewer).
-float rainLayer(vec2 q, vec2 vp, float n, float speed, float seed, float I) {
-  vec2 d = q - vp;
-  float r = length(d);
-  float a = atan(d.y, d.x) / 6.2831853 + 0.5;
+// r / a: distance and normalised angle from the vanishing point (computed once by the caller).
+float rainLayer(float r, float a, float n, float speed, float seed, float I) {
   float id = floor(a * n);
   float fa = fract(a * n) - 0.5;
   float h = hash11(id * 1.31 + seed);
@@ -47,9 +56,13 @@ float rainLayer(vec2 q, vec2 vp, float n, float speed, float seed, float I) {
 }
 
 vec3 sky(vec2 q, float t, float I) {
-  float D = cloudDensity(q, t);
-  float D2 = cloudDensity(q + vec2(0.03, 0.04), t);     // offset sample for fake lighting
-  float shade = clamp((D - D2) * 5.0 + 0.5, 0.0, 1.0);
+  // Fake lighting from the density gradient: screen-space derivatives instead of a second
+  // full cloud evaluation (the old offset sample at (0.03, 0.04) doubled the cost).
+  // Only the low octaves are differentiated, so the lighting stays soft and fluffy.
+  float low;
+  float D = cloudDensity(q, t, low);
+  vec2 grad = vec2(dFdx(low), dFdy(low)) * iResolution.y;  // dD/dq
+  float shade = clamp(-dot(grad, vec2(0.03, 0.04)) * 5.0 + 0.5, 0.0, 1.0);
   float dens = smoothstep(0.3, 0.8, D);
   vec3 col = mix(vec3(0.02, 0.025, 0.035), vec3(0.3, 0.33, 0.4), dens);
   col *= 0.4 + 1.1 * shade;
@@ -69,9 +82,12 @@ vec3 sky(vec2 q, float t, float I) {
 
   // Rain toward the viewer, three depths.
   vec2 vp = vec2(0.04 * sin(t * 0.3), 0.06);
-  float rn = rainLayer(q, vp, 140.0, 0.9, 1.0, I) * 0.5
-           + rainLayer(q, vp, 90.0, 0.7, 2.0, I) * 0.7
-           + rainLayer(q, vp, 60.0, 0.55, 3.0, I);
+  vec2 dv = q - vp;
+  float rr = length(dv);
+  float ra = atan(dv.y, dv.x) / 6.2831853 + 0.5;
+  float rn = rainLayer(rr, ra, 140.0, 0.9, 1.0, I) * 0.5
+           + rainLayer(rr, ra, 90.0, 0.7, 2.0, I) * 0.7
+           + rainLayer(rr, ra, 60.0, 0.55, 3.0, I);
   col += vec3(0.6, 0.65, 0.8) * rn * 0.9;
   return col;
 }

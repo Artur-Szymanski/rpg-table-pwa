@@ -24,8 +24,8 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   float K = I < 1.0 ? mix(1200.0, 2700.0, I) : mix(2700.0, 6500.0, I - 1.0);
   vec3 tint = kelvin(K);
 
-  // Grid of large square pixels (about 12 across the shorter side).
-  float cell = min(iResolution.x, iResolution.y) / 12.0;
+  // Grid of large square pixels (about 24 across the shorter side).
+  float cell = min(iResolution.x, iResolution.y) / 24.0;
   vec2 g = fragCoord / cell;
   vec2 id = floor(g);
   vec2 f = fract(g) - 0.5;
