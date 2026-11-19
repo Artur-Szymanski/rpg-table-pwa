@@ -103,6 +103,9 @@ vec3 staticDrops(vec2 q, float t) {
   vec2 c = (vec2(hash12(id + 1.3), hash12(id + 7.1)) - 0.5) * 0.6;
   float life = fract(t * 0.06 + h);
   float R = (0.1 + 0.18 * hash12(id + 3.3)) * smoothstep(0.0, 0.03, life) * (1.0 - 0.7 * life) * step(0.3, h);
+  // Empty cell: smoothstep(0, 0, x) is undefined in GLSL (mobile GPUs return 1 / NaN, which
+  // turned whole cells into giant refracting squares), so bail out explicitly.
+  if (R < 0.005) return vec3(0.0);
   vec2 d = f - c;
   float m = smoothstep(R, R * 0.8, length(d));
   return vec3(d / max(R, 1e-3) * m, m);
@@ -130,8 +133,11 @@ vec3 slidingDrops(vec2 q, float t, float cols, float seed) {
   float tid = floor(cy);
   vec2 td = vec2(dx, (fract(cy) - 0.5) / 45.0);
   float tr = 0.004 * step(0.4, hash11(tid + id * 13.0)) * trail;
-  float tm = smoothstep(tr, tr * 0.6, length(td)) * step(0.0005, tr);
-  n += td / max(tr, 1e-4) * tm * 0.6;
+  float tm = 0.0;
+  if (tr > 0.0005) {                                         // avoid smoothstep(0, 0, x) on empty rows
+    tm = smoothstep(tr, tr * 0.6, length(td));
+    n += td / tr * tm * 0.6;
+  }
   return vec3(n, max(m, tm));
 }
 
