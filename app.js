@@ -139,9 +139,18 @@
   }
   document.addEventListener('visibilitychange', () => { if (!document.hidden && wakeLock !== null) requestWakeLock(); });
 
+  // The table monitor is landscape and screen casting sends the phone screen as is, so a
+  // portrait phone shows up as a narrow strip. Chrome only allows the lock in fullscreen
+  // (or in the installed app), hence it follows the fullscreen request.
+  function lockLandscape() {
+    try { screen.orientation.lock('landscape').catch(() => {}); } catch (e) { /* unsupported */ }
+  }
+
   function enterFullscreen() {
     if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
-      document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
+      document.documentElement.requestFullscreen({ navigationUI: 'hide' }).then(lockLandscape, lockLandscape);
+    } else {
+      lockLandscape();
     }
     requestWakeLock();
   }

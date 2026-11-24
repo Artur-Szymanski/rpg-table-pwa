@@ -7,7 +7,7 @@ na pełnym ekranie i działa offline.
 ## Obsługa
 - **Stuknięcie w ekran**: pokaż / ukryj paski UI.
 - **Górny pasek**: przycisk **PHOTOS / EFFECTS** przełącza listę między zdjęciami (sceny z `image`) a efektami, żeby efekty-przerywniki były zawsze pod ręką; ‹ / lista / › tylko wybierają efekt (ekran się nie zmienia), **AKTYWUJ** go włącza
-  (przy pierwszym użyciu także pełny ekran i blokada wygaszania). Migający przycisk = wybrany efekt jest inny niż aktywny.
+  (przy pierwszym użyciu także pełny ekran, blokada wygaszania i obrót do poziomu — pod monitor przez Chromecasta). Migający przycisk = wybrany efekt jest inny niż aktywny.
 - **Suwak INT**: parametr `uIntensity` aktywnego efektu; ustawienie jest zapamiętywane osobno dla każdego efektu.
 - **Dolny pasek (kości)**: wybierz kość (d4–d100), potem modyfikator −2…+6 i **RZUĆ**; ↩ wraca do wyboru kości.
   Przez chwilę migają losowe liczby, potem wynik, który zostaje na ekranie do ↩, kolejnego rzutu albo aktywacji
