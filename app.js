@@ -81,7 +81,8 @@
         : typeof scene.intensity === 'number' ? scene.intensity : 1;
       renderer.intensity = intensity;
       $('intensity').value = intensity;
-      document.body.className = 'theme-' + (scene.theme || 'glitch');
+      for (const c of [...document.body.classList]) if (c.startsWith('theme-')) document.body.classList.remove(c);
+      document.body.classList.add('theme-' + (scene.theme || 'glitch'));
       updateLampLight();
     } catch (e) {
       showError(scene.name + ': ' + (e.message || e));
@@ -139,12 +140,26 @@
   }
   document.addEventListener('visibilitychange', () => { if (!document.hidden && wakeLock !== null) requestWakeLock(); });
 
-  // The table monitor is landscape and screen casting sends the phone screen as is, so a
-  // portrait phone shows up as a narrow strip. Chrome only allows the lock in fullscreen
-  // (or in the installed app), hence it follows the fullscreen request.
+  // Pivot: the table monitor stands upright, but Chromecast always sends a landscape frame and
+  // mirrors the phone screen as is. So the phone is locked to landscape-primary (the cast fills
+  // the frame) and the whole page is turned 90 degrees in CSS (body.rotated): upright on a monitor
+  // rotated clockwise and on the phone held normally. Chrome allows the lock only in fullscreen
+  // or in the installed app, hence it follows the fullscreen request. ?rotate=1 forces the
+  // rotated layout on desktop for testing.
+  const forceRotate = new URLSearchParams(location.search).has('rotate');
   function lockLandscape() {
-    try { screen.orientation.lock('landscape').catch(() => {}); } catch (e) { /* unsupported */ }
+    try { screen.orientation.lock('landscape-primary').catch(() => {}); } catch (e) { /* unsupported */ }
   }
+  function updateRotation() {
+    const type = (screen.orientation && screen.orientation.type) || '';
+    const coarse = matchMedia('(pointer: coarse)').matches;
+    const on = forceRotate || (coarse && type.startsWith('landscape'));
+    document.body.classList.toggle('rotated', on);
+    document.body.classList.toggle('rotated-flip', on && type === 'landscape-secondary');
+  }
+  if (screen.orientation) screen.orientation.addEventListener('change', updateRotation);
+  window.addEventListener('resize', updateRotation);
+  updateRotation();
 
   function enterFullscreen() {
     if (!document.fullscreenElement && document.documentElement.requestFullscreen) {

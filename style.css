@@ -289,3 +289,25 @@ body .settled .roll-total.word.fumble { animation: neon-ignite 0.9s linear 1; }
   overflow: auto;
   z-index: 10;
 }
+
+/* --- Pivot (portrait monitor fed by a landscape cast) -------------------------------------
+   The phone is locked to landscape, so Chromecast sends a full landscape frame; the whole
+   page is turned 90° inside it, which looks upright on a monitor rotated clockwise and on the
+   phone held upright. Fixed children are laid out in the rotated body (transformed ancestor),
+   viewport units are replaced by container units. */
+body.rotated {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vh; height: 100vw;
+  transform-origin: 0 0;
+  transform: rotate(-90deg) translateX(-100%);
+  container-type: size;
+}
+body.rotated.rotated-flip { transform: rotate(90deg) translateY(-100%); }
+body.rotated #stage { width: 100%; height: 100%; }
+body.rotated .bar-top { padding-top: max(6px, env(safe-area-inset-left)); padding-left: 6px; padding-right: 6px; }
+body.rotated.rotated-flip .bar-top { padding-top: max(6px, env(safe-area-inset-right)); }
+body.rotated .bar-bottom { padding-bottom: 6px; padding-left: 6px; padding-right: 6px; }
+body.rotated .roll-total { font-size: clamp(96px, 34cqw, 220px); }
+body.rotated .roll-total.word { font-size: clamp(64px, 22cqw, 160px); }
+body.rotated #error { max-height: 50cqh; }

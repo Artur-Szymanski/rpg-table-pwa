@@ -7,13 +7,20 @@ na pełnym ekranie i działa offline.
 ## Obsługa
 - **Stuknięcie w ekran**: pokaż / ukryj paski UI.
 - **Górny pasek**: przycisk **PHOTOS / EFFECTS** przełącza listę między zdjęciami (sceny z `image`) a efektami, żeby efekty-przerywniki były zawsze pod ręką; ‹ / lista / › tylko wybierają efekt (ekran się nie zmienia), **AKTYWUJ** go włącza
-  (przy pierwszym użyciu także pełny ekran, blokada wygaszania i obrót do poziomu — pod monitor przez Chromecasta). Migający przycisk = wybrany efekt jest inny niż aktywny.
+  (przy pierwszym użyciu także pełny ekran, blokada wygaszania i tryb pivot — patrz niżej). Migający przycisk = wybrany efekt jest inny niż aktywny.
 - **Suwak INT**: parametr `uIntensity` aktywnego efektu; ustawienie jest zapamiętywane osobno dla każdego efektu.
 - **Dolny pasek (kości)**: wybierz kość (d4–d100), potem modyfikator −2…+6 i **RZUĆ**; ↩ wraca do wyboru kości.
   Przez chwilę migają losowe liczby, potem wynik, który zostaje na ekranie do ↩, kolejnego rzutu albo aktywacji
   innego efektu. Krój i efekt cyfr zależą od motywu aktywnego efektu (czcionki w `fonts/`, licencja SIL OFL).
   Na k20 naturalna 20 pokazuje **CRIT!**, a naturalna 1 czerwony neon **FAIL!**. Opis rzutu (np. `d20 [14] +4 = 18`)
   jest tuż nad dolnym paskiem, żeby środek ekranu był czysty.
+
+## Monitor pionowy przez Chromecasta (pivot)
+Chromecast zawsze wysyła obraz poziomy i przesyła ekran telefonu tak, jak jest. Dlatego po AKTYWUJ
+telefon blokuje się w poziomie, a cała aplikacja jest obrócona o 90° — na telefonie trzymanym pionowo
+wygląda normalnie, a na monitorze obróconym **zgodnie z ruchem wskazówek zegara** stoi prosto i wypełnia
+ekran. Natywna lista wyboru sceny (rozwijana) otwiera się bokiem — wygodniej używać ‹ ›.
+Na komputerze układ obrócony można podejrzeć przez `?rotate=1` w adresie.
 
 Losowanie: `crypto.getRandomValues` z odrzucaniem, więc bez przekłamań rozkładu.
 
